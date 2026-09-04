@@ -8,7 +8,10 @@
 export const shopifyConfig = {
   shop: process.env.SHOPIFY_SHOP ?? '',
   adminToken: process.env.SHOPIFY_ADMIN_TOKEN ?? '',
-  appSecret: process.env.SHOPIFY_APP_SECRET ?? '',
+  /** Used to mint Admin API tokens for stores in your own organisation. */
+  clientId: process.env.SHOPIFY_CLIENT_ID ?? '',
+  clientSecret: process.env.SHOPIFY_CLIENT_SECRET ?? '',
+  appSecret: process.env.SHOPIFY_APP_SECRET ?? process.env.SHOPIFY_CLIENT_SECRET ?? '',
   apiVersion: process.env.SHOPIFY_API_VERSION ?? '2026-01',
   /** The subpath the online store proxies to this service. */
   proxyPrefix: process.env.SHOPIFY_PROXY_PREFIX ?? '/apps/fitting-room',

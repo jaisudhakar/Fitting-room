@@ -1,5 +1,6 @@
 import { FittingRoomError } from '../../modules/fitting-room/errors.js';
 import { adminEndpoint, shopifyConfig } from './config.js';
+import { createClientCredentialsProvider } from './tokens.js';
 
 export class AdminApiError extends FittingRoomError {
   constructor(message, { status = 502, code = 'shopify_admin_error', details = [] } = {}) {
@@ -17,19 +18,22 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 export const createAdminClient = ({
   shop = shopifyConfig.shop,
-  adminToken = shopifyConfig.adminToken,
+  adminToken,
+  tokenProvider,
   apiVersion = shopifyConfig.apiVersion,
   fetchImpl = fetch,
   maxRetries = 3,
   sleepImpl = sleep,
 } = {}) => {
-  if (!shop || !adminToken) {
-    throw new AdminApiError('Set SHOPIFY_SHOP and SHOPIFY_ADMIN_TOKEN before talking to the Admin API.', {
+  if (!shop) {
+    throw new AdminApiError('Set SHOPIFY_SHOP before talking to the Admin API.', {
       status: 500,
       code: 'shopify_not_configured',
     });
   }
 
+  // Imported lazily so the two modules can reference each other's errors.
+  const provider = tokenProvider ?? resolveProvider({ shop, adminToken });
   const endpoint = adminEndpoint({ shop, apiVersion });
 
   /**
@@ -38,12 +42,21 @@ export const createAdminClient = ({
    * @returns {Promise<object>} the `data` object
    */
   const request = async (query, variables = {}) => {
+    let reminted = false;
+
     for (let attempt = 0; ; attempt += 1) {
       const response = await fetchImpl(endpoint, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-shopify-access-token': adminToken },
+        headers: { 'content-type': 'application/json', 'x-shopify-access-token': await provider() },
         body: JSON.stringify({ query, variables }),
       });
+
+      // A minted token can expire mid-flight; mint a fresh one and try once more.
+      if ((response.status === 401 || response.status === 403) && !reminted && provider.strategy === 'client_credentials') {
+        provider.invalidate();
+        reminted = true;
+        continue;
+      }
 
       if (response.status === 429 || response.status >= 500) {
         if (attempt >= maxRetries) {
@@ -83,7 +96,19 @@ export const createAdminClient = ({
     }
   };
 
-  return { shop, apiVersion, endpoint, request };
+  return { shop, apiVersion, endpoint, request, tokenStrategy: provider.strategy };
+};
+
+/** Split out so `tokens.js` can import this module's error without a cycle at load time. */
+const resolveProvider = ({ shop, adminToken }) => {
+  const token = adminToken ?? shopifyConfig.adminToken;
+  if (token) {
+    const provider = async () => token;
+    provider.invalidate = () => {};
+    provider.strategy = 'static';
+    return provider;
+  }
+  return createClientCredentialsProvider({ shop });
 };
 
 export default createAdminClient;

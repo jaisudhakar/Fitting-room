@@ -3,6 +3,7 @@ import { createHmac } from 'node:crypto';
 import { describe, it } from 'node:test';
 
 import { createAdminClient } from '../src/adapters/shopify/adminClient.js';
+import { createClientCredentialsProvider } from '../src/adapters/shopify/tokens.js';
 import {
   UnauthorizedError,
   signMakeUp,
@@ -242,8 +243,8 @@ describe('the Admin client', () => {
     });
   });
 
-  it('refuses to start without configuration', () => {
-    assert.throws(() => createAdminClient({ shop: '', adminToken: '' }), /SHOPIFY_SHOP/);
+  it('refuses to start without a shop', () => {
+    assert.throws(() => createAdminClient({ shop: '', adminToken: 'shpat_x' }), /SHOPIFY_SHOP/);
   });
 });
 
@@ -379,5 +380,105 @@ describe('the cart transform function', () => {
     const [operation] = cartTransformRun({ cart: { lines: [line({ unitPrice: { value: '15300' }, summary: { value: summary } })] } }).operations;
     assert.equal(operation.lineUpdate.title.length, 100);
     assert.ok(operation.lineUpdate.title.endsWith('...'));
+  });
+});
+
+describe('minting an Admin token', () => {
+  const provider = (fetchImpl, options = {}) =>
+    createClientCredentialsProvider({
+      shop: 'x.myshopify.com',
+      clientId: 'id',
+      clientSecret: 'secret',
+      fetchImpl,
+      ...options,
+    });
+
+  const tokenResponse = (body, status = 200) => ({ ok: status === 200, status, json: async () => body });
+
+  it('exchanges the app credentials for a token', async () => {
+    let sent = null;
+    const token = await provider(async (url, init) => {
+      sent = { url, body: JSON.parse(init.body) };
+      return tokenResponse({ access_token: 'shpat_minted', expires_in: 86399 });
+    })();
+
+    assert.equal(token, 'shpat_minted');
+    assert.equal(sent.url, 'https://x.myshopify.com/admin/oauth/access_token');
+    assert.equal(sent.body.grant_type, 'client_credentials');
+    assert.equal(sent.body.client_secret, 'secret');
+  });
+
+  it('reuses the token until it is nearly expired', async () => {
+    let calls = 0;
+    let clock = 0;
+    const mint = provider(
+      async () => {
+        calls += 1;
+        return tokenResponse({ access_token: `token-${calls}`, expires_in: 100 });
+      },
+      { now: () => clock, skewMs: 10_000 },
+    );
+
+    assert.equal(await mint(), 'token-1');
+    clock = 50_000;
+    assert.equal(await mint(), 'token-1', 'still fresh');
+    clock = 95_000;
+    assert.equal(await mint(), 'token-2', 'inside the skew, so re-minted');
+    assert.equal(calls, 2);
+  });
+
+  it('mints once when several requests race for a token', async () => {
+    let calls = 0;
+    const mint = provider(async () => {
+      calls += 1;
+      return tokenResponse({ access_token: 'shared', expires_in: 86399 });
+    });
+
+    const tokens = await Promise.all([mint(), mint(), mint()]);
+    assert.deepEqual(tokens, ['shared', 'shared', 'shared']);
+    assert.equal(calls, 1);
+  });
+
+  it('explains a refusal instead of leaking the response', async () => {
+    await assert.rejects(
+      () => provider(async () => tokenResponse({ error: 'invalid_client', error_description: 'Client authentication failed' }, 401))(),
+      (error) => {
+        assert.equal(error.code, 'shopify_token_refused');
+        assert.equal(error.message, 'Client authentication failed');
+        return true;
+      },
+    );
+  });
+
+  it('re-mints once when Shopify rejects a token mid-flight', async () => {
+    let mints = 0;
+    let calls = 0;
+    const client = createAdminClient({
+      shop: 'x.myshopify.com',
+      tokenProvider: Object.assign(
+        async () => {
+          mints += 1;
+          return `token-${mints}`;
+        },
+        { invalidate: () => {}, strategy: 'client_credentials' },
+      ),
+      fetchImpl: async () => {
+        calls += 1;
+        return calls === 1
+          ? { ok: false, status: 401, headers: { get: () => null }, json: async () => ({}) }
+          : { ok: true, status: 200, headers: { get: () => null }, json: async () => ({ data: { ok: true } }) };
+      },
+      sleepImpl: async () => {},
+    });
+
+    assert.deepEqual(await client.request('q'), { ok: true });
+    assert.equal(mints, 2);
+  });
+
+  it('refuses to start with neither a token nor credentials', () => {
+    assert.throws(
+      () => createAdminClient({ shop: 'x.myshopify.com', adminToken: '' }),
+      /SHOPIFY_CLIENT_ID/,
+    );
   });
 });

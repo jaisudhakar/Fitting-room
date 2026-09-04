@@ -10,6 +10,11 @@
 export { shopifyConfig, adminEndpoint } from './config.js';
 export { AdminApiError, createAdminClient } from './adminClient.js';
 export {
+  createClientCredentialsProvider,
+  createStaticTokenProvider,
+  resolveTokenProvider,
+} from './tokens.js';
+export {
   UnauthorizedError,
   signMakeUp,
   verifyAppProxySignature,
