@@ -69,10 +69,13 @@ Scopes are already declared: `read_products`, `write_products`, `write_cart_tran
 
 ```bash
 cd shopify
+npm install          # once — the CLI builds the function through this workspace
 shopify app deploy
 ```
 
 That pushes three things: the app configuration (proxy + webhook + scopes), the **theme app extension** (the product-page block) and the **cart transform function**. Install the app on your development store with the link the dashboard gives you.
+
+The function is JavaScript, so it has **no build command** — Shopify CLI compiles it with Javy. If you see *"The function extension fitting-room-pricing doesn't have a build command or it's empty"*, something has added an `[extensions.build]` block back into `shopify/extensions/fitting-room-pricing/shopify.extension.toml`; delete it.
 
 ### 5. Give the service its credentials
 
@@ -136,6 +139,8 @@ Steps 5–9 against Tangelos, with a live-store install of the app. Deploy the a
 | Block shows "The fitting room answered 401" | Proxy signature failed — `SHOPIFY_APP_SECRET` does not match the app's client secret |
 | Block shows "No product with slug…" | That product has no `fitting_room.config` metafield — run `shopify:setup config <handle>` |
 | Storefront price right, cart price wrong | The cart transform is not installed — run `shopify:setup cart-transform` |
+| Deploy fails: "doesn't have a build command or it's empty" | An `[extensions.build]` block is in the function's toml — JavaScript functions must not have one |
+| Deploy fails to build the function | `npm install` has not been run in `shopify/` |
 | `shopify_token_refused` in the logs | Client ID/secret wrong, or the app is not installed on that store |
 | "Google refused that key…" | The Google key is wrong or has no billing enabled |
 | Options render but nothing prices | The service cannot reach the Admin API — check `SHOPIFY_SHOP` and the logs |

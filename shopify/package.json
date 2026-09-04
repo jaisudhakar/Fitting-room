@@ -1,0 +1,14 @@
+{
+  "name": "fitting-room-app",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "The Shopify app around the fitting room service: theme block and cart transform.",
+  "workspaces": [
+    "extensions/*"
+  ],
+  "scripts": {
+    "dev": "shopify app dev",
+    "deploy": "shopify app deploy"
+  }
+}

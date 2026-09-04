@@ -1,0 +1,14 @@
+{
+  "name": "fitting-room-pricing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Cart transform: charge what the fitting room quoted.",
+  "scripts": {
+    "typegen": "shopify app function typegen"
+  },
+  "dependencies": {
+    "@shopify/shopify_function": "^2.0.0"
+  }
+}

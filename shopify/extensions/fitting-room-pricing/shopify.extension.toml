@@ -4,12 +4,13 @@ api_version = "2026-01"
 name = "Fitting room pricing"
 handle = "fitting-room-pricing"
 type = "function"
+description = "Charges what the fitting room quoted for a customised garment."
 
   [[extensions.targeting]]
   target = "purchase.cart-transform.run"
   input_query = "src/run.graphql"
   export = "cartTransformRun"
 
-  [extensions.build]
-  command = ""
-  path = "dist/function.wasm"
+# No [extensions.build] block: for JavaScript functions Shopify CLI compiles
+# src/ with Javy itself. Setting an empty build command makes the CLI fail with
+# "doesn't have a build command or it's empty".
