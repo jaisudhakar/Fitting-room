@@ -29,26 +29,79 @@ Trousers*) included to prove that the catalogue is per-product configurable.
 | Draft sessions so a shopper can leave and come back | `session.js` |
 | Cart line with a stable `variantKey` for basket de-duplication | `service.js` |
 | Dependency-free JSON HTTP API | `http/router.js`, `routes.js`, `controller.js` |
+| Try-on rail: up to six validated picks per look | `try-on/service.js` |
+| Prompt written from the make-up, not the product name | `try-on/prompt.js` |
+| Google image generation with the shopper's own key, errors translated | `try-on/providers/google.js` |
 
 Zero runtime dependencies. Node 20+.
 
 ## Demo
 
-A working demo storefront — pick a size, a fabric and a make-up, and watch the price, the
-tailoring rules and the lead time respond:
+A working demo storefront — pick a size, a fabric and a make-up, watch the price, the
+tailoring rules and the lead time respond, then hang the result in the fitting room and
+draw it on a mannequin:
 
 **https://claude.ai/code/artifact/777e85ca-a12c-48ea-a087-c4bc616a1d0f**
 
 The page is static and ships in `demo/index.html`; open it straight from disk if you prefer.
+The fitting room panel calls Google directly with the key you paste into it — which the
+published artifact's sandbox blocks, so there it falls back to a preview this page draws
+itself. Open the file locally, or run the service, to draw for real.
 Its catalogue, rules, size chart and sizing coefficients are generated from the module's own
 source by `node scripts/build-demo.mjs`, so it cannot drift from the API — re-run that after
 changing `catalog.js` or `data/products.json`.
+
+## Try-on: wearing the make-up
+
+The second module is the fitting room itself, in the sense the reference site uses it: hang
+a finished make-up on a rail, then have an image model draw it on a mannequin.
+
+- **The rail** — a try-on session holds up to six picks. A pick is a *validated* make-up, so
+  a shirt that cannot be manufactured cannot be worn; each pick carries its labels, its
+  fabric colour and its price.
+- **The prompt** — built from the make-up, not from the product name: the fabric, the
+  collar, the cuff, the buttons, the hem and the monogram (thread colour and placement
+  included) are all spelled out, so the drawing shows what the shopper actually chose.
+- **The key is the shopper's** — it arrives in the `x-goog-api-key` header, is used for that
+  one call, and is never written to the job, the session or a log. `GOOGLE_API_KEY` in the
+  environment is the fallback for a shop that pays for its own renders.
+- **Errors say what to do** — Google's "API key not valid" becomes *"Google refused that
+  key. Check that it is correct and that billing is enabled for it."*, rate limits and
+  outages are marked retryable, and a model that answers with words instead of a picture is
+  reported as such.
+- **`provider: "preview"`** draws nothing and needs no key — for tests, CI and local work.
+
+```bash
+# hang the current make-up, then draw it
+SESSION=$(curl -s -X POST localhost:3000/api/try-on/sessions | jq -r .session.id)
+curl -s -X POST localhost:3000/api/try-on/sessions/$SESSION/picks \
+  -H 'content-type: application/json' \
+  -d '{"slug":"beige-linen-shirt","selection":{"options":{"size":"l","fit":"tailored","fabric":"stone-washed-linen","collar":"cutaway","sleeve":"long","cuff":"french","placket":"standard","pocket":"none","buttons":"mother-of-pearl","hem":"curved"}}}'
+curl -s -X POST localhost:3000/api/try-on/sessions/$SESSION/looks \
+  -H "x-goog-api-key: $GOOGLE_API_KEY" -H 'content-type: application/json' -d '{"mannequinId":"atelier-form"}'
+# → { "status": "ready", "imageUrl": "/api/try-on/looks/look_…/image", … }
+```
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/try-on/mannequins` | The forms a look can be drawn on |
+| `POST` | `/api/try-on/sessions` | Open a rail |
+| `GET` | `/api/try-on/sessions/:sessionId` | The rail and its picks |
+| `POST` | `/api/try-on/sessions/:sessionId/picks` | Hang a validated make-up |
+| `DELETE` | `/api/try-on/sessions/:sessionId/picks/:pickId` | Take a piece off |
+| `POST` | `/api/try-on/sessions/:sessionId/reset` | Start over |
+| `POST` | `/api/try-on/sessions/:sessionId/looks` | Draw the look (key in `x-goog-api-key`) |
+| `GET` | `/api/try-on/looks/:lookId` | Job status, prompt, image URL |
+| `GET` | `/api/try-on/looks/:lookId/image` | The drawn image |
+
+Configure with `TRY_ON_PROVIDER` (`google` \| `preview`), `TRY_ON_MODEL`
+(default `gemini-2.5-flash-image`) and `GOOGLE_API_KEY`.
 
 ## Getting started
 
 ```bash
 npm start                          # http://localhost:3000
-npm test                           # 69 tests, node:test
+npm test                           # 90 tests, node:test
 node examples/fitting-room-flow.js # the whole flow, no server needed
 ```
 
@@ -75,6 +128,14 @@ scripts/build-demo.mjs         bakes the live catalogue into the demo page
     service.js                 orchestration: the API the rest of the app calls
     controller.js / routes.js  HTTP adapters
     errors.js                  typed errors that carry an HTTP status
+  modules/try-on/
+    catalog.js                 mannequins and the six-piece limit
+    prompt.js                  the make-up, written out for the image model
+    providers/google.js        Google image generation, with its errors translated
+    providers/preview.js       offline provider for tests and local work
+    session.js                 the rail and the drawn looks
+    service.js                 hang, remove, start over, draw
+    controller.js / routes.js  HTTP adapters
 ```
 
 The domain never imports the HTTP layer, so the module can be used directly from an
@@ -215,5 +276,6 @@ npm test
 
 `test/validator.test.js` (rules, measurements, monogram), `test/pricing.test.js` (money,
 VAT, lead time), `test/sizing.test.js` (estimation and recommendation),
-`test/service.test.js` (sessions, merging, cart lines) and `test/api.test.js` (the HTTP
-surface, against a real server).
+`test/service.test.js` (sessions, merging, cart lines), `test/try-on.test.js` (the rail, the
+prompt, and every Google failure mapped through an injected `fetch`) and `test/api.test.js`
+(the HTTP surface, against a real server). No test touches the network.

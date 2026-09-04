@@ -3,6 +3,7 @@ import { after, before, describe, it } from 'node:test';
 
 import { createApp } from '../src/app.js';
 import { InMemorySessionStore, setSessionStore } from '../src/modules/fitting-room/session.js';
+import { InMemoryTryOnStore, setTryOnStore } from '../src/modules/try-on/session.js';
 
 let server;
 let baseUrl;
@@ -19,6 +20,7 @@ const request = async (method, path, body) => {
 
 before(async () => {
   setSessionStore(new InMemorySessionStore());
+  setTryOnStore(new InMemoryTryOnStore());
   ({ server } = createApp({ sweepIntervalMs: 0 }));
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   baseUrl = `http://127.0.0.1:${server.address().port}`;
@@ -148,6 +150,47 @@ describe('fitting room API', () => {
     const { status, body } = await request('DELETE', '/api/products/beige-linen-shirt/fitting-room');
     assert.equal(status, 405);
     assert.deepEqual(body.error.details[0].allow, ['GET']);
+  });
+
+  it('hangs a make-up on the try-on rail and draws it', async () => {
+    const opened = await request('POST', '/api/try-on/sessions');
+    assert.equal(opened.status, 201);
+    const sessionId = opened.body.session.id;
+    assert.ok(opened.body.mannequins.length > 0);
+
+    const draft = await request('POST', '/api/products/beige-linen-shirt/fitting-room/sessions');
+    const hung = await request('POST', `/api/try-on/sessions/${sessionId}/picks`, {
+      slug: 'beige-linen-shirt',
+      selection: draft.body.selection,
+    });
+    assert.equal(hung.status, 201);
+    assert.equal(hung.body.pieces, 1);
+
+    const look = await request('POST', `/api/try-on/sessions/${sessionId}/looks`, { provider: 'preview' });
+    assert.equal(look.status, 201);
+    assert.equal(look.body.status, 'ready');
+    assert.match(look.body.prompt, /mannequin/);
+
+    const image = await fetch(`${baseUrl}${look.body.imageUrl}`);
+    assert.equal(image.status, 200);
+    assert.equal(image.headers.get('content-type'), 'image/png');
+    assert.ok((await image.arrayBuffer()).byteLength > 0);
+
+    const cleared = await request('POST', `/api/try-on/sessions/${sessionId}/reset`);
+    assert.equal(cleared.body.pieces, 0);
+  });
+
+  it('asks for a key when none is supplied', async () => {
+    const opened = await request('POST', '/api/try-on/sessions');
+    const draft = await request('POST', '/api/products/beige-linen-shirt/fitting-room/sessions');
+    await request('POST', `/api/try-on/sessions/${opened.body.session.id}/picks`, {
+      slug: 'beige-linen-shirt',
+      selection: draft.body.selection,
+    });
+
+    const { status, body } = await request('POST', `/api/try-on/sessions/${opened.body.session.id}/looks`, {});
+    assert.equal(status, 401);
+    assert.equal(body.error.code, 'missing_api_key');
   });
 
   it('404s an unknown path', async () => {

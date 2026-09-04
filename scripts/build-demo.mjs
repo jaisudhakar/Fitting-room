@@ -24,6 +24,7 @@ import {
 } from '../src/modules/fitting-room/catalog.js';
 import { defaultSelection, getProductBySlug, getSizeChart, resolveGroups, resolveSteps } from '../src/modules/fitting-room/repository.js';
 import { SIZING_CONSTANTS } from '../src/modules/fitting-room/sizing.js';
+import { MANNEQUINS, MAX_PICKS } from '../src/modules/try-on/catalog.js';
 
 const path = (relative) => fileURLToPath(new URL(relative, import.meta.url));
 
@@ -56,6 +57,7 @@ const data = {
   sizing: SIZING_CONSTANTS,
   defaultSelection: defaultSelection(product),
   taxRate: config.taxRate,
+  tryOn: { mannequins: MANNEQUINS, maxPicks: MAX_PICKS },
 };
 
 const template = readFileSync(path('../demo/template.html'), 'utf8');
@@ -64,4 +66,6 @@ const html = template.replace('"__FITTING_ROOM_DATA__"', JSON.stringify(data, nu
 if (html === template) throw new Error('The data placeholder is missing from demo/template.html.');
 
 writeFileSync(path('../demo/index.html'), html);
-console.log(`demo/index.html written — ${data.groups.length} option groups, ${data.rules.length} rules.`);
+console.log(
+  `demo/index.html written — ${data.groups.length} option groups, ${data.rules.length} rules, ${data.tryOn.mannequins.length} mannequins.`,
+);

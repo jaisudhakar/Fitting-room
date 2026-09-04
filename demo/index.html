@@ -408,6 +408,200 @@
   }
   .toast.on { opacity: 1; transform: translateX(-50%) translateY(-4px); }
 
+  /* ── the fitting room panel ─────────────────────────────────── */
+  .hanger {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    transition: background 120ms ease, transform 120ms ease;
+  }
+  .hanger:hover { background: var(--surface-sunk); transform: translateY(-1px); }
+  .hanger svg { width: 20px; height: 20px; stroke: var(--ink); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sketch { position: relative; }
+
+  .launcher {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--ink);
+    color: var(--ground);
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.6rem 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+  }
+  .launcher .count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    background: var(--ground);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 0.05rem 0.4rem;
+  }
+
+  .room {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 45;
+    width: min(330px, calc(100vw - 2.5rem));
+    max-height: min(86vh, 760px);
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.22);
+    padding: 1rem 1.05rem 1.1rem;
+  }
+  .room[hidden] { display: none; }
+  .room-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
+  .room-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; margin: 0; }
+  .room-head p { margin: 0.15rem 0 0; font-size: 0.76rem; color: var(--muted); }
+  .icon-btn {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.15rem 0.25rem;
+  }
+  .icon-btn:hover { color: var(--ink); }
+
+  .stage {
+    margin-top: 0.85rem;
+    aspect-ratio: 3 / 4;
+    background: var(--surface-sunk);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .stage svg, .stage img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .stage .empty { font-size: 0.78rem; color: var(--muted); text-align: center; padding: 0 1.5rem; }
+  .stage .badge {
+    position: absolute;
+    left: 0.5rem;
+    bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--ground);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.15rem 0.4rem;
+  }
+  .stage.busy::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 12px, var(--accent-soft) 12px, var(--accent-soft) 24px);
+    opacity: 0.5;
+    animation: drift 1.1s linear infinite;
+  }
+  @keyframes drift { to { background-position: 34px 0; } }
+  @media (prefers-reduced-motion: reduce) { .stage.busy::after { animation: none; } }
+
+  .picks-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0.9rem 0 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .picks { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pick { position: relative; }
+  .pick i {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+  }
+  .pick .drop {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ground);
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    font-size: 0.66rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .pick .drop:hover { color: var(--flag); border-color: var(--flag); }
+  .picks .empty { font-size: 0.78rem; color: var(--muted); }
+
+  .room .error {
+    margin: 0.8rem 0 0;
+    font-size: 0.78rem;
+    color: var(--flag);
+  }
+  .room .draw {
+    margin-top: 0.9rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--accent);
+    color: #fff;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .room .draw[disabled] { background: var(--surface-sunk); border-color: var(--line); color: var(--muted); cursor: not-allowed; }
+  .room-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+  .room-foot button { background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 0.3rem 0.1rem; }
+  .room-foot button:hover { color: var(--ink); }
+  .key-panel { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed var(--line); }
+  .key-panel[hidden] { display: none; }
+  .key-panel input {
+    width: 100%;
+    background: var(--ground);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.45rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .key-panel p { margin: 0.4rem 0 0; font-size: 0.7rem; color: var(--muted); }
+  .key-row { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+  .key-row button { flex: 1; padding: 0.4rem; border: 1px solid var(--line-strong); background: transparent; border-radius: 3px; cursor: pointer; font-size: 0.76rem; }
+  .key-row button:hover { background: var(--surface-sunk); }
+
   footer.note { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.78rem; max-width: 70ch; }
   footer.note code { font-family: var(--font-mono); font-size: 0.72rem; }
 
@@ -1178,7 +1372,30 @@
     "measurements": null,
     "monogram": null
   },
-  "taxRate": 0.2
+  "taxRate": 0.2,
+  "tryOn": {
+    "mannequins": [
+      {
+        "id": "atelier-form",
+        "label": "Atelier form",
+        "description": "A featureless light-grey shop mannequin, full length, standing square to camera on a soft grey backdrop.",
+        "height": "tall"
+      },
+      {
+        "id": "seated-form",
+        "label": "Seated form",
+        "description": "A featureless light-grey mannequin seated on a plain stool, three-quarter view, soft grey backdrop.",
+        "height": "tall"
+      },
+      {
+        "id": "flat-lay",
+        "label": "Flat lay",
+        "description": "No figure: the pieces styled as a flat lay on a linen sheet, shot from directly above in daylight.",
+        "height": null
+      }
+    ],
+    "maxPicks": 6
+  }
 }</script>
 
 <div class="wrap">
@@ -1237,6 +1454,9 @@
           <rect class="variant variant--pocket-right outline" x="160" y="126" width="36" height="40" rx="2"></rect>
           <text id="mono-mark" class="monogram-mark" x="0" y="0" text-anchor="middle"></text>
         </svg>
+        <button class="hanger" id="hang" title="Hang this make-up in the fitting room" aria-label="Hang this make-up in the fitting room">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a2 2 0 1 0-2 2 2 2 0 0 0 2-2Zm0 2v2.5L3.6 15.2a1.4 1.4 0 0 0 .9 2.5h15a1.4 1.4 0 0 0 .9-2.5L12 8.5"></path></svg>
+        </button>
         <figcaption><span id="sketch-fabric">—</span><span id="sketch-size">—</span></figcaption>
       </figure>
 
@@ -1315,6 +1535,38 @@
     </div>
   </div>
 </div>
+
+<button class="launcher" id="launcher" hidden>Fitting room<span class="count" id="launcher-count">0</span></button>
+
+<aside class="room" id="room" aria-label="Fitting room">
+  <div class="room-head">
+    <div>
+      <h2>Fitting room</h2>
+      <p>Tap the hanger on the sketch to wear this make-up.</p>
+    </div>
+    <button class="icon-btn" id="room-close" aria-label="Close the fitting room">✕</button>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="picks-head"><span>Your picks</span><span id="pieces">0 pieces</span></div>
+  <div class="picks" id="picks"></div>
+
+  <p class="error" id="room-error" hidden></p>
+
+  <button class="draw" id="draw">Draw the look</button>
+
+  <div class="room-foot">
+    <button id="key-toggle">⚿ Your API key</button>
+    <button id="start-over">↻ Start over</button>
+  </div>
+
+  <div class="key-panel" id="key-panel" hidden>
+    <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…">
+    <div class="key-row"><button id="key-save">Save key</button><button id="key-forget">Forget</button></div>
+    <p id="key-note">Your Google AI Studio key. Kept in this browser only, sent straight to Google when you draw.</p>
+  </div>
+</aside>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1868,7 +2120,304 @@
     toastTimer = setTimeout(() => toast.classList.remove("on"), 4200);
   });
 
+  /* ── the fitting room: picks, a key, and a drawn look ────────── */
+  const room = { picks: [], key: null, look: null, error: null, busy: false, open: true };
+
+  const KEY_STORE = "fitting-room.google-key";
+  const readStoredKey = () => {
+    try {
+      return localStorage.getItem(KEY_STORE);
+    } catch {
+      return null;
+    }
+  };
+  const writeStoredKey = (value) => {
+    try {
+      if (value) localStorage.setItem(KEY_STORE, value);
+      else localStorage.removeItem(KEY_STORE);
+    } catch {
+      /* private windows and blocked site data: the key just does not persist */
+    }
+  };
+
+  const labelsFor = () => {
+    const details = {};
+    for (const group of DATA.groups) {
+      const value = group.values.find((candidate) => candidate.id === state.options[group.id]);
+      if (value) details[group.id] = value.label;
+    }
+    return details;
+  };
+
+  const pickKey = () =>
+    Array.from(JSON.stringify([state.options, state.monogram])).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7).toString(16);
+
+  const currentPick = () => {
+    const fabric = DATA.groups.find((group) => group.id === "fabric").values.find((value) => value.id === state.options.fabric);
+    const position = state.monogram ? DATA.monogram.positions.find((item) => item.id === state.monogram.position) : null;
+    const thread = state.monogram ? DATA.monogram.threads.find((item) => item.id === state.monogram.thread) : null;
+    return {
+      id: pickKey(),
+      title: DATA.product.title,
+      details: labelsFor(),
+      swatch: fabric ? fabric.swatch : "#D8CBB4",
+      threadSwatch: thread ? thread.swatch : "#1F2A44",
+      sleeve: state.options.sleeve,
+      price: money(price().unitPrice),
+      monogram: state.monogram && state.monogram.text
+        ? { text: state.monogram.text, position: position ? position.label : "", thread: thread ? thread.label : "" }
+        : null,
+    };
+  };
+
+  /* The same prompt the Node module builds, so a look drawn here matches one
+     drawn by the service. See src/modules/try-on/prompt.js. */
+  const promptFor = (picks, mannequinId) => {
+    const mannequin = DATA.tryOn.mannequins.find((item) => item.id === mannequinId) || DATA.tryOn.mannequins[0];
+    const clause = (pick) => {
+      const parts = [];
+      const say = (text) => (text ? parts.push(text) : undefined);
+      say(pick.details.fit && pick.details.fit.toLowerCase() + " fit");
+      say(pick.details.fabric && pick.details.fabric.toLowerCase());
+      say(pick.details.collar && pick.details.collar.toLowerCase() + " collar");
+      say(pick.details.sleeve && pick.details.sleeve.toLowerCase());
+      say(pick.details.cuff && pick.details.cuff !== "No cuff (short sleeve)" && pick.details.cuff.toLowerCase() + "s");
+      say(pick.details.pocket && pick.details.pocket !== "No pocket" && pick.details.pocket.toLowerCase());
+      say(pick.details.buttons && pick.details.buttons.toLowerCase() + " buttons");
+      say(pick.details.hem && pick.details.hem.toLowerCase());
+      const monogram = pick.monogram
+        ? ", with the initials " + pick.monogram.text + " embroidered in " + pick.monogram.thread.toLowerCase() +
+          " thread on the " + pick.monogram.position.toLowerCase()
+        : "";
+      return pick.title + " — " + parts.join(", ") + monogram;
+    };
+
+    return [
+      "Photograph a fitting room look for an online clothing shop.",
+      "",
+      "Setting: " + mannequin.description,
+      "",
+      picks.length === 1 ? "The piece being worn:" : "The pieces being worn together:",
+      picks.map((pick, index) => index + 1 + ". " + clause(pick)).join("\n"),
+      "",
+      "Rules:",
+      "- Show every listed detail exactly as described; the fabric colour and weight must read true.",
+      "- Natural daylight, soft shadows, no props, no text, no logos, no watermark.",
+      "- Full length, the whole garment in frame, sharp focus, plain background.",
+      "- No human face or skin: the form is a plain mannequin.",
+    ].join("\n");
+  };
+
+  /* A drawing this page makes itself, so there is always something on the form
+     even when Google cannot be reached. */
+  const houseLook = (pick) => {
+    const shortSleeve = pick.sleeve === "short";
+    return (
+      '<svg viewBox="0 0 240 320" role="img" aria-label="The make-up on the atelier form">' +
+      '<rect width="240" height="320" fill="var(--surface-sunk)"></rect>' +
+      '<g fill="#B7BAB0" stroke="#8E9288" stroke-width="1.2">' +
+      '<ellipse cx="120" cy="44" rx="17" ry="22"></ellipse>' +
+      '<rect x="112" y="62" width="16" height="16"></rect>' +
+      '<path d="M100 196 L118 196 L116 300 L102 300 Z"></path>' +
+      '<path d="M122 196 L140 196 L138 300 L124 300 Z"></path>' +
+      "</g>" +
+      '<g fill="' + pick.swatch + '" stroke="#2A2C24" stroke-opacity="0.7" stroke-width="1.3" stroke-linejoin="round">' +
+      (shortSleeve
+        ? '<path d="M96 80 L78 88 L74 128 L94 132 Z"></path><path d="M144 80 L162 88 L166 128 L146 132 Z"></path>'
+        : '<path d="M96 80 L76 88 L66 172 L84 178 L96 124 Z"></path><path d="M144 80 L164 88 L174 172 L156 178 L144 124 Z"></path>') +
+      '<path d="M96 78 L144 78 L154 154 L150 202 L90 202 L86 154 Z"></path>' +
+      '<path d="M108 76 L120 82 L114 106 L102 88 Z"></path>' +
+      '<path d="M132 76 L120 82 L126 106 L138 88 Z"></path>' +
+      "</g>" +
+      '<g fill="#EDE7DA" stroke="#2A2C24" stroke-opacity="0.5" stroke-width="0.7">' +
+      '<circle cx="120" cy="116" r="2.6"></circle><circle cx="120" cy="140" r="2.6"></circle>' +
+      '<circle cx="120" cy="164" r="2.6"></circle><circle cx="120" cy="188" r="2.6"></circle>' +
+      "</g>" +
+      (pick.monogram
+        ? '<text x="100" y="152" text-anchor="middle" font-family="Bodoni Moda, serif" font-size="11" fill="' +
+          pick.threadSwatch + '">' + pick.monogram.text + "</text>"
+        : "") +
+      "</svg>"
+    );
+  };
+
+  const renderRoom = () => {
+    const stage = $("stage");
+    const pieces = room.picks.length;
+
+    $("pieces").textContent = pieces + (pieces === 1 ? " piece" : " pieces");
+    $("launcher-count").textContent = String(pieces);
+    $("room").hidden = !room.open;
+    $("launcher").hidden = room.open;
+
+    stage.classList.toggle("busy", room.busy);
+    if (room.look && room.look.src) {
+      stage.innerHTML = '<img src="' + room.look.src + '" alt="The look drawn by Google">' +
+        '<span class="badge">' + room.look.badge + "</span>";
+    } else if (pieces > 0) {
+      stage.innerHTML = houseLook(room.picks[room.picks.length - 1]) +
+        '<span class="badge">' + (room.busy ? "Drawing…" : "House preview") + "</span>";
+    } else {
+      stage.innerHTML = '<p class="empty">Nothing on the rail yet. Tap the hanger on the sketch to wear this make-up.</p>';
+    }
+
+    $("picks").innerHTML = pieces
+      ? room.picks
+          .map(
+            (pick) =>
+              '<span class="pick" title="' + pick.details.fabric + ' · ' + pick.price + '">' +
+              '<i style="background:' + pick.swatch + '"></i>' +
+              '<button class="drop" data-drop="' + pick.id + '" aria-label="Take off ' + pick.details.fabric + '">✕</button>' +
+              "</span>",
+          )
+          .join("")
+      : '<span class="empty">Nothing picked yet.</span>';
+
+    $("picks").querySelectorAll("[data-drop]").forEach((button) => {
+      button.addEventListener("click", () => {
+        room.picks = room.picks.filter((pick) => pick.id !== button.dataset.drop);
+        room.look = null;
+        renderRoom();
+      });
+    });
+
+    $("room-error").hidden = !room.error;
+    $("room-error").textContent = room.error || "";
+    $("draw").disabled = room.busy || pieces === 0;
+    $("draw").textContent = room.busy ? "Drawing the look…" : "Draw the look";
+    $("key-note").textContent = room.key
+      ? "Key saved in this browser (…" + room.key.slice(-4) + "). Sent straight to Google when you draw."
+      : "Your Google AI Studio key. Kept in this browser only, sent straight to Google when you draw.";
+  };
+
+  /* Google's own errors are unhelpful in the case shoppers actually hit, so
+     they are translated the same way the Node provider translates them. */
+  const googleFailure = (status, body) => {
+    const detail = (body && body.error && body.error.message) || "";
+    const reason = (body && body.error && body.error.status) || "";
+    if (status === 429 || reason === "RESOURCE_EXHAUSTED") return "Google is rate-limiting this key. Wait a moment and draw the look again.";
+    if (status >= 500 || reason === "UNAVAILABLE") return "Google could not draw the look just now. Try again in a minute.";
+    if (status === 404) return "Google does not offer that image model to this key.";
+    if (status === 400 || status === 401 || status === 403 || reason === "PERMISSION_DENIED") {
+      return "Google refused that key. Check that it is correct and that billing is enabled for it.";
+    }
+    return detail || "Google could not draw the look.";
+  };
+
+  const drawLook = async () => {
+    if (room.picks.length === 0) {
+      room.error = "Add a piece to the rail before drawing the look.";
+      renderRoom();
+      return;
+    }
+    if (!room.key) {
+      room.error = "Add your Google API key to draw the look.";
+      $("key-panel").hidden = false;
+      $("api-key").focus();
+      renderRoom();
+      return;
+    }
+
+    room.busy = true;
+    room.error = null;
+    renderRoom();
+
+    const prompt = promptFor(room.picks, DATA.tryOn.mannequins[0].id);
+
+    try {
+      const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-goog-api-key": room.key },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ["IMAGE"] },
+        }),
+      });
+
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        room.error = googleFailure(response.status, body);
+      } else {
+        const parts = (body && body.candidates && body.candidates[0] && body.candidates[0].content.parts) || [];
+        const inline = parts.map((part) => part.inlineData || part.inline_data).find((data) => data && data.data);
+        if (inline) {
+          room.look = { src: "data:" + (inline.mimeType || inline.mime_type || "image/png") + ";base64," + inline.data, badge: "Drawn by Google" };
+        } else {
+          const words = parts.find((part) => part.text);
+          room.error = words ? "Google returned words instead of a picture: " + words.text.slice(0, 120) : "Google returned no image for that look.";
+        }
+      }
+    } catch {
+      room.error =
+        "This published page cannot call Google directly — the artifact sandbox blocks outbound requests. " +
+        "Run the demo from the repo (npm start) to draw for real; the house preview below is drawn by this page.";
+    } finally {
+      room.busy = false;
+      renderRoom();
+    }
+  };
+
+  $("hang").addEventListener("click", () => {
+    const issues = validate();
+    room.open = true;
+    if (issues.length > 0) {
+      room.error = "Fix the make-up first: " + issues[0].message;
+      renderRoom();
+      return;
+    }
+    const pick = currentPick();
+    if (room.picks.some((existing) => existing.id === pick.id)) {
+      room.error = "That exact make-up is already on the rail.";
+    } else if (room.picks.length >= DATA.tryOn.maxPicks) {
+      room.error = "A look holds at most " + DATA.tryOn.maxPicks + " pieces. Take one off first.";
+    } else {
+      room.picks.push(pick);
+      room.look = null;
+      room.error = null;
+    }
+    renderRoom();
+  });
+
+  $("room-close").addEventListener("click", () => {
+    room.open = false;
+    renderRoom();
+  });
+  $("launcher").addEventListener("click", () => {
+    room.open = true;
+    renderRoom();
+  });
+  $("draw").addEventListener("click", drawLook);
+  $("start-over").addEventListener("click", () => {
+    room.picks = [];
+    room.look = null;
+    room.error = null;
+    renderRoom();
+  });
+  $("key-toggle").addEventListener("click", () => {
+    $("key-panel").hidden = !$("key-panel").hidden;
+    if (!$("key-panel").hidden) $("api-key").focus();
+  });
+  $("key-save").addEventListener("click", () => {
+    const value = $("api-key").value.trim();
+    room.key = value || null;
+    writeStoredKey(room.key);
+    room.error = null;
+    $("api-key").value = "";
+    $("key-panel").hidden = true;
+    renderRoom();
+  });
+  $("key-forget").addEventListener("click", () => {
+    room.key = null;
+    writeStoredKey(null);
+    $("api-key").value = "";
+    renderRoom();
+  });
+
+  room.key = readStoredKey();
+  if (window.innerWidth < 900) room.open = false;
+
   render();
   showVerdict();
+  renderRoom();
 })();
 </script>
