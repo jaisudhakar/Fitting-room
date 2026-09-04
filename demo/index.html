@@ -107,8 +107,30 @@
     text-wrap: balance;
   }
   .masthead p.sub { margin: 0.45rem 0 0; color: var(--muted); max-width: 46ch; }
+  .masthead .actions { display: flex; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; }
   .from-price { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); text-align: right; }
   .from-price b { display: block; font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; color: var(--ink); }
+  .cta {
+    background: var(--ink);
+    color: var(--ground);
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 0.7rem 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .cta:hover { background: transparent; color: var(--ink); }
+  .cta small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+
+  @keyframes flag-attention {
+    from { box-shadow: 0 0 0 3px var(--accent-soft); }
+    to { box-shadow: 0 0 0 3px transparent; }
+  }
+  .attention { animation: flag-attention 1.4s ease-out 2; }
+  @media (prefers-reduced-motion: reduce) { .attention { animation: none; } }
 
   /* ── layout ───────────────────────────────────────────────── */
   .layout {
@@ -1166,7 +1188,10 @@
       <h1 id="title">Beige Linen Shirt</h1>
       <p class="sub" id="subtitle"></p>
     </div>
-    <p class="from-price">From<b id="from-price">—</b>incl. VAT</p>
+    <div class="actions">
+      <p class="from-price">From<b id="from-price">—</b>incl. VAT</p>
+      <button class="cta" id="open-fitting-room">Try the fitting room<small>6 steps · nothing saved</small></button>
+    </div>
   </header>
 
   <div class="layout">
@@ -1819,6 +1844,17 @@
   };
 
   $("recommend").addEventListener("click", showVerdict);
+
+  $("open-fitting-room").addEventListener("click", () => {
+    const target = $("finder-section");
+    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+    const panel = target.querySelector(".finder");
+    panel.classList.remove("attention");
+    void panel.offsetWidth;
+    panel.classList.add("attention");
+    $("height").focus({ preventScroll: true });
+  });
 
   let toastTimer;
   $("add").addEventListener("click", () => {
