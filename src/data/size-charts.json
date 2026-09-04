@@ -1,0 +1,16 @@
+{
+  "unisex-shirt-eu": {
+    "id": "unisex-shirt-eu",
+    "label": "Shirts — EU sizing",
+    "unit": "cm",
+    "measuredOn": "body",
+    "sizes": [
+      { "size": "xs", "chest": [86, 92], "neck": [35, 37], "waist": [70, 78], "height": [160, 172] },
+      { "size": "s", "chest": [92, 98], "neck": [37, 38], "waist": [78, 84], "height": [166, 178] },
+      { "size": "m", "chest": [98, 104], "neck": [38, 39.5], "waist": [84, 90], "height": [172, 184] },
+      { "size": "l", "chest": [104, 112], "neck": [39.5, 41], "waist": [90, 98], "height": [176, 188] },
+      { "size": "xl", "chest": [112, 120], "neck": [41, 43], "waist": [98, 106], "height": [180, 194] },
+      { "size": "xxl", "chest": [120, 130], "neck": [43, 45], "waist": [106, 116], "height": [184, 200] }
+    ]
+  }
+}

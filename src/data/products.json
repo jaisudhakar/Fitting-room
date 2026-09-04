@@ -1,0 +1,62 @@
+[
+  {
+    "id": "prd_beige_linen_shirt",
+    "slug": "beige-linen-shirt",
+    "title": "Beige Linen Shirt",
+    "subtitle": "Washed European linen, cut in Portugal",
+    "currency": "EUR",
+    "basePrice": 8900,
+    "leadTimeDays": 3,
+    "images": {
+      "default": "/images/beige-linen-shirt/front.jpg",
+      "byFabric": {
+        "beige-linen-160": "/images/beige-linen-shirt/beige-160.jpg",
+        "linen-cotton-blend": "/images/beige-linen-shirt/blend-140.jpg",
+        "stone-washed-linen": "/images/beige-linen-shirt/stone-washed.jpg",
+        "garment-dyed-linen": "/images/beige-linen-shirt/garment-dyed.jpg",
+        "belgian-linen-180": "/images/beige-linen-shirt/belgian-180.jpg"
+      }
+    },
+    "fittingRoom": {
+      "enabled": true,
+      "sizeChartId": "unisex-shirt-eu",
+      "monogram": { "enabled": true },
+      "madeToMeasure": { "enabled": true },
+      "groups": {
+        "size": { "default": "m" },
+        "fit": { "default": "tailored" },
+        "fabric": { "default": "beige-linen-160" },
+        "collar": { "default": "classic" },
+        "sleeve": { "default": "long" },
+        "cuff": { "default": "barrel-single" },
+        "placket": { "default": "standard" },
+        "pocket": { "default": "none" },
+        "buttons": { "default": "corozo-natural" },
+        "hem": { "default": "curved" }
+      }
+    }
+  },
+  {
+    "id": "prd_stone_linen_trousers",
+    "slug": "stone-linen-trousers",
+    "title": "Stone Linen Trousers",
+    "subtitle": "Pleated, drawstring waist",
+    "currency": "EUR",
+    "basePrice": 9900,
+    "leadTimeDays": 4,
+    "images": { "default": "/images/stone-linen-trousers/front.jpg", "byFabric": {} },
+    "fittingRoom": {
+      "enabled": true,
+      "sizeChartId": "unisex-shirt-eu",
+      "monogram": { "enabled": false },
+      "madeToMeasure": { "enabled": true },
+      "groups": {
+        "size": { "default": "m" },
+        "fit": { "default": "relaxed", "allow": ["tailored", "relaxed", "oversized"] },
+        "fabric": { "default": "stone-washed-linen", "allow": ["stone-washed-linen", "garment-dyed-linen", "belgian-linen-180"] },
+        "buttons": { "default": "corozo-natural" },
+        "hem": { "default": "straight" }
+      }
+    }
+  }
+]

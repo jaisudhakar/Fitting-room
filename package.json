@@ -1,0 +1,27 @@
+{
+  "name": "fitting-room",
+  "version": "1.0.0",
+  "description": "Fitting Room module: product customization, made-to-measure sizing and live pricing for apparel product pages.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./server": "./src/server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "fitting-room",
+    "product-customization",
+    "made-to-measure",
+    "size-recommendation"
+  ],
+  "license": "MIT"
+}
