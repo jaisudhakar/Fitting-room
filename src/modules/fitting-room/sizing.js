@@ -9,7 +9,19 @@ const FIT_PREFERENCE_EASE = { fitted: -3, regular: 0, loose: 5 };
 /** Ease built into each cut, in cm — a slim block needs a touch more body room. */
 const FIT_BLOCK_EASE = { slim: -2, tailored: 0, relaxed: 3, oversized: 6 };
 
+/**
+ * The numbers behind the recommendation, exported so another surface (the demo
+ * storefront, a size guide, an A/B test) can reuse them instead of copying them.
+ */
+export const SIZING_CONSTANTS = {
+  bodyTypeChestAdjustment: BODY_TYPE_CHEST_ADJUSTMENT,
+  bodyTypeWaistAdjustment: BODY_TYPE_WAIST_ADJUSTMENT,
+  fitPreferenceEase: FIT_PREFERENCE_EASE,
+  fitBlockEase: FIT_BLOCK_EASE,
+};
+
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const article = (word) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
 const round1 = (value) => Math.round(value * 10) / 10;
 
 /** How far a measurement sits outside a [min, max] range. 0 means it fits. */
@@ -128,7 +140,7 @@ export const recommendSize = (product, profile) => {
   const rationale = [
     measuredChest
       ? `Matched on your chest measurement of ${body.chest} cm.`
-      : `Estimated a chest of ${body.chest} cm from ${heightCm} cm / ${weightKg} kg and a ${bodyType} build.`,
+      : `Estimated a chest of ${body.chest} cm from ${heightCm} cm / ${weightKg} kg and ${article(bodyType)} ${bodyType} build.`,
     ease !== 0
       ? `Added ${ease > 0 ? '+' : ''}${ease} cm of ease for a ${fitPreference} fit${profile.fit ? ` on the ${profile.fit} block` : ''}.`
       : 'Used the standard ease for this cut.',

@@ -1,0 +1,1838 @@
+<title>Linen Shirt Fitting Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #E7E9E1;
+    --surface: #F5F6F0;
+    --surface-sunk: #DEE1D6;
+    --ink: #1C211C;
+    --muted: #666D62;
+    --line: #C6CBBC;
+    --line-strong: #9AA292;
+    --accent: #33407B;
+    --accent-soft: #DDE1F1;
+    --flag: #94382B;
+    --flag-soft: #F1DED9;
+    --ok: #3C6647;
+
+    --font-display: "Bodoni Moda", "Didot", Georgia, serif;
+    --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --step: clamp(0.9rem, 0.85rem + 0.2vw, 1rem);
+    --gap: 1.5rem;
+    --radius: 3px;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14170F;
+      --surface: #1C2018;
+      --surface-sunk: #23281E;
+      --ink: #E9EBE0;
+      --muted: #979E8C;
+      --line: #343A2B;
+      --line-strong: #4E5643;
+      --accent: #97A3E8;
+      --accent-soft: #262C46;
+      --flag: #E0917F;
+      --flag-soft: #3A241F;
+      --ok: #8FBF9C;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #14170F;
+    --surface: #1C2018;
+    --surface-sunk: #23281E;
+    --ink: #E9EBE0;
+    --muted: #979E8C;
+    --line: #343A2B;
+    --line-strong: #4E5643;
+    --accent: #97A3E8;
+    --accent-soft: #262C46;
+    --flag: #E0917F;
+    --flag-soft: #3A241F;
+    --ok: #8FBF9C;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--step);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(1rem, 3vw, 2.5rem) 6rem; }
+
+  /* ── masthead ─────────────────────────────────────────────── */
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding: 2.25rem 0 1.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.5rem;
+  }
+  .masthead h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.1rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .masthead p.sub { margin: 0.45rem 0 0; color: var(--muted); max-width: 46ch; }
+  .from-price { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); text-align: right; }
+  .from-price b { display: block; font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; color: var(--ink); }
+
+  /* ── layout ───────────────────────────────────────────────── */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+    padding-top: 2rem;
+  }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  .rail { position: sticky; top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  @media (max-width: 900px) { .rail { position: static; } }
+
+  /* ── flat sketch ──────────────────────────────────────────── */
+  .sketch {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1rem 1rem 0.5rem;
+  }
+  .sketch svg { display: block; width: 100%; height: auto; }
+  .sketch figcaption {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.15rem 0.35rem;
+    border-top: 1px solid var(--line);
+  }
+
+  /* The cloth keeps its real colour in both themes, so its own lines are drawn
+     in a fixed ink that reads against the fabric rather than against the page. */
+  .cloth { fill: var(--cloth, #D8CBB4); }
+  .stitch { fill: none; stroke: #2A2C24; stroke-opacity: 0.45; stroke-width: 1.1; }
+  .outline { fill: var(--cloth, #D8CBB4); stroke: #2A2C24; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linejoin: round; }
+  .btn-dot { fill: var(--button, #E8E0CF); stroke: #2A2C24; stroke-opacity: 0.6; stroke-width: 0.8; }
+  .variant { display: none; }
+  svg[data-sleeve="long"] .variant--sleeve-long,
+  svg[data-sleeve="short"] .variant--sleeve-short,
+  svg[data-hem="curved"] .variant--hem-curved,
+  svg[data-hem="straight"] .variant--hem-straight,
+  svg[data-collar="classic"] .variant--collar-classic,
+  svg[data-collar="button-down"] .variant--collar-classic,
+  svg[data-collar="button-down"] .variant--collar-buttons,
+  svg[data-collar="cutaway"] .variant--collar-cutaway,
+  svg[data-collar="band"] .variant--collar-band,
+  svg[data-placket="standard"] .variant--placket,
+  svg[data-placket="standard"] .variant--buttons,
+  svg[data-placket="hidden"] .variant--buttons-hidden,
+  svg[data-placket="no-placket"] .variant--buttons,
+  svg[data-pocket="single-patch"] .variant--pocket-left,
+  svg[data-pocket="double-patch"] .variant--pocket-left,
+  svg[data-pocket="double-patch"] .variant--pocket-right { display: block; }
+  .monogram-mark { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.08em; fill: var(--thread, #1F2A44); }
+
+  /* ── docket ───────────────────────────────────────────────── */
+  .docket { background: var(--surface); border: 1px solid var(--line); padding: 1.1rem 1.15rem 1.25rem; }
+  .docket h2 {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+    font-weight: 500;
+  }
+  .lines { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.8rem; }
+  .lines div { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.85rem; }
+  .lines .label { color: var(--muted); }
+  .lines .amt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lines .amt.plus { color: var(--accent); }
+  .totals { border-top: 1px solid var(--line); padding-top: 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .totals div { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.85rem; color: var(--muted); }
+  .totals div.grand { color: var(--ink); align-items: baseline; }
+  .totals .grand .amt { font-family: var(--font-display); font-size: 1.5rem; }
+  .ship {
+    margin-top: 0.85rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed var(--line);
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .ship b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
+
+  .add {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--ink);
+    color: var(--ground);
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .add:hover { background: transparent; color: var(--ink); }
+  .add[disabled] { background: var(--surface-sunk); border-color: var(--line); color: var(--muted); cursor: not-allowed; }
+  .blocker {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    color: var(--flag);
+    display: flex;
+    gap: 0.4rem;
+    align-items: baseline;
+  }
+  .blocker::before { content: "✕"; font-size: 0.7rem; }
+
+  /* ── sections ─────────────────────────────────────────────── */
+  .sections { display: flex; flex-direction: column; gap: 2.75rem; }
+  section { scroll-margin-top: 1rem; }
+  .head { display: flex; align-items: baseline; gap: 0.85rem; margin-bottom: 1rem; }
+  .num {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line-strong);
+    padding-bottom: 0.1rem;
+    min-width: 1.4rem;
+  }
+  .head h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; margin: 0; letter-spacing: -0.01em; }
+  .head p { margin: 0; color: var(--muted); font-size: 0.82rem; }
+
+  .group { margin-bottom: 1.35rem; }
+  .group > .glabel {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .chip:hover { border-color: var(--line-strong); }
+  .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--surface-sunk); }
+  .chip .delta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .chip.flagged { border-color: var(--flag); background: var(--flag-soft); }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.5rem; }
+  .swatch {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 0.7rem;
+    align-items: center;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.7rem;
+    cursor: pointer;
+  }
+  .swatch:hover { border-color: var(--line-strong); }
+  .swatch[aria-pressed="true"] { border-color: var(--ink); background: var(--surface-sunk); }
+  .swatch i { display: block; width: 34px; height: 34px; border: 1px solid rgba(0,0,0,0.18); border-radius: 2px; }
+  .swatch .name { display: block; font-weight: 500; line-height: 1.3; }
+  .swatch .meta { display: block; font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); }
+  .swatch .delta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent); }
+
+  .issue {
+    margin-top: 0.55rem;
+    font-size: 0.79rem;
+    color: var(--flag);
+    background: var(--flag-soft);
+    border-left: 2px solid var(--flag);
+    padding: 0.4rem 0.6rem;
+  }
+
+  /* ── size finder ──────────────────────────────────────────── */
+  .finder { background: var(--surface); border: 1px solid var(--line); padding: 1.15rem 1.25rem 1.25rem; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
+  .field { display: flex; flex-direction: column; gap: 0.3rem; }
+  .field label { font-family: var(--font-mono); font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .field input, .field select {
+    background: var(--ground);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.45rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+  .field .hint { font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted); }
+  .field input.bad { border-color: var(--flag); }
+  .ghost {
+    margin-top: 0.9rem;
+    background: transparent;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .ghost:hover { background: var(--surface-sunk); }
+  .ghost.small { margin: 0; padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+
+  .verdict { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--line); display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; align-items: start; }
+  .verdict .size { font-family: var(--font-display); font-size: 3rem; line-height: 0.9; }
+  .meter { height: 4px; background: var(--surface-sunk); border-radius: 2px; overflow: hidden; margin: 0.45rem 0 0.6rem; }
+  .meter span { display: block; height: 100%; background: var(--accent); }
+  .verdict ul { margin: 0; padding-left: 1rem; color: var(--muted); font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.2rem; }
+  .verdict .conf { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .alts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+
+  /* ── measurements ─────────────────────────────────────────── */
+  .measures { background: var(--surface); border: 1px solid var(--line); padding: 1rem 1.1rem 1.15rem; margin-top: 0.9rem; }
+  .measures h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; margin: 0 0 0.15rem; }
+  .measures p { margin: 0 0 0.85rem; color: var(--muted); font-size: 0.8rem; }
+  .measures .fields { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+
+  /* ── monogram ─────────────────────────────────────────────── */
+  .mono-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-top: 0.9rem; }
+  .threads { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .thread { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); cursor: pointer; padding: 0; }
+  .thread[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .switch { display: inline-flex; align-items: center; gap: 0.55rem; cursor: pointer; }
+  .switch input { width: 1.05rem; height: 1.05rem; accent-color: var(--accent); }
+
+  /* ── review ───────────────────────────────────────────────── */
+  .recap { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .recap tr { border-bottom: 1px solid var(--line); }
+  .recap td { padding: 0.42rem 0; vertical-align: top; }
+  .recap td:first-child { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); width: 42%; padding-right: 1rem; }
+  .recap td:last-child { text-align: right; }
+
+  details.api { margin-top: 1.25rem; border-top: 1px solid var(--line); padding-top: 0.9rem; }
+  details.api summary { cursor: pointer; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  details.api summary:hover { color: var(--ink); }
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 0.85rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    line-height: 1.5;
+    margin: 0.75rem 0 0;
+  }
+  .endpoint { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent); margin: 0.75rem 0 0; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--ground);
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    max-width: min(92vw, 460px);
+  }
+  .toast.on { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+  footer.note { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.78rem; max-width: 70ch; }
+  footer.note code { font-family: var(--font-mono); font-size: 0.72rem; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<script id="fr-data" type="application/json">{
+  "product": {
+    "slug": "beige-linen-shirt",
+    "title": "Beige Linen Shirt",
+    "subtitle": "Washed European linen, cut in Portugal",
+    "currency": "EUR",
+    "basePrice": 8900,
+    "leadTimeDays": 3
+  },
+  "steps": [
+    {
+      "id": "size",
+      "label": "Your size",
+      "description": "Pick a stock size or have the shirt cut to your measurements."
+    },
+    {
+      "id": "fit",
+      "label": "Fit",
+      "description": "How close to the body the shirt should sit."
+    },
+    {
+      "id": "fabric",
+      "label": "Fabric",
+      "description": "Weight, weave and hand-feel of the linen."
+    },
+    {
+      "id": "details",
+      "label": "Details",
+      "description": "Collar, cuffs, placket, pocket and buttons."
+    },
+    {
+      "id": "monogram",
+      "label": "Monogram",
+      "description": "Optional embroidered initials."
+    },
+    {
+      "id": "review",
+      "label": "Review",
+      "description": "Confirm the make-up and the price."
+    }
+  ],
+  "groups": [
+    {
+      "id": "size",
+      "label": "Size",
+      "step": "size",
+      "type": "single",
+      "required": true,
+      "description": "Stock sizes ship from the warehouse; made-to-measure is cut for you.",
+      "values": [
+        {
+          "id": "xs",
+          "label": "XS",
+          "priceDelta": 0
+        },
+        {
+          "id": "s",
+          "label": "S",
+          "priceDelta": 0
+        },
+        {
+          "id": "m",
+          "label": "M",
+          "priceDelta": 0
+        },
+        {
+          "id": "l",
+          "label": "L",
+          "priceDelta": 0
+        },
+        {
+          "id": "xl",
+          "label": "XL",
+          "priceDelta": 0
+        },
+        {
+          "id": "xxl",
+          "label": "XXL",
+          "priceDelta": 0
+        },
+        {
+          "id": "made-to-measure",
+          "label": "Made to measure",
+          "priceDelta": 4500,
+          "leadTimeDays": 10,
+          "description": "Cut to the seven measurements you provide."
+        }
+      ],
+      "default": "m"
+    },
+    {
+      "id": "fit",
+      "label": "Fit",
+      "step": "fit",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "slim",
+          "label": "Slim",
+          "priceDelta": 0,
+          "description": "Close through the chest and waist."
+        },
+        {
+          "id": "tailored",
+          "label": "Tailored",
+          "priceDelta": 0,
+          "description": "Light shaping, room to move."
+        },
+        {
+          "id": "relaxed",
+          "label": "Relaxed",
+          "priceDelta": 0,
+          "description": "Straight body, dropped shoulder."
+        },
+        {
+          "id": "oversized",
+          "label": "Oversized",
+          "priceDelta": 0,
+          "description": "Two sizes of extra volume."
+        }
+      ],
+      "default": "tailored"
+    },
+    {
+      "id": "fabric",
+      "label": "Fabric",
+      "step": "fabric",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "beige-linen-160",
+          "label": "Beige linen 160g",
+          "priceDelta": 0,
+          "swatch": "#D8CBB4",
+          "meta": {
+            "weightGsm": 160,
+            "composition": "100% European linen"
+          }
+        },
+        {
+          "id": "linen-cotton-blend",
+          "label": "Linen / cotton blend 140g",
+          "priceDelta": -1000,
+          "swatch": "#E2D8C6",
+          "description": "Softer and less prone to creasing.",
+          "meta": {
+            "weightGsm": 140,
+            "composition": "55% linen, 45% cotton"
+          }
+        },
+        {
+          "id": "stone-washed-linen",
+          "label": "Stone-washed linen 170g",
+          "priceDelta": 1500,
+          "leadTimeDays": 2,
+          "swatch": "#CDBEA4",
+          "meta": {
+            "weightGsm": 170,
+            "composition": "100% washed linen"
+          }
+        },
+        {
+          "id": "garment-dyed-linen",
+          "label": "Garment-dyed heavy linen 190g",
+          "priceDelta": 2500,
+          "leadTimeDays": 3,
+          "swatch": "#BFAE90",
+          "meta": {
+            "weightGsm": 190,
+            "composition": "100% linen, piece dyed"
+          }
+        },
+        {
+          "id": "belgian-linen-180",
+          "label": "Premium Belgian linen 180g",
+          "priceDelta": 3500,
+          "leadTimeDays": 4,
+          "swatch": "#DCD2BE",
+          "meta": {
+            "weightGsm": 180,
+            "composition": "100% Belgian flax linen"
+          }
+        }
+      ],
+      "default": "beige-linen-160"
+    },
+    {
+      "id": "collar",
+      "label": "Collar",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "classic",
+          "label": "Classic point",
+          "priceDelta": 0
+        },
+        {
+          "id": "cutaway",
+          "label": "Cutaway",
+          "priceDelta": 500
+        },
+        {
+          "id": "button-down",
+          "label": "Button-down",
+          "priceDelta": 500
+        },
+        {
+          "id": "band",
+          "label": "Band (collarless)",
+          "priceDelta": 500
+        }
+      ],
+      "default": "classic"
+    },
+    {
+      "id": "sleeve",
+      "label": "Sleeve length",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "long",
+          "label": "Long sleeve",
+          "priceDelta": 0
+        },
+        {
+          "id": "short",
+          "label": "Short sleeve",
+          "priceDelta": -800
+        }
+      ],
+      "default": "long"
+    },
+    {
+      "id": "cuff",
+      "label": "Cuff",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "none",
+          "label": "No cuff (short sleeve)",
+          "priceDelta": 0
+        },
+        {
+          "id": "barrel-single",
+          "label": "Single-button barrel",
+          "priceDelta": 0
+        },
+        {
+          "id": "barrel-double",
+          "label": "Two-button barrel",
+          "priceDelta": 400
+        },
+        {
+          "id": "french",
+          "label": "French cuff",
+          "priceDelta": 1200,
+          "leadTimeDays": 1
+        }
+      ],
+      "default": "barrel-single"
+    },
+    {
+      "id": "placket",
+      "label": "Placket",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "standard",
+          "label": "Standard placket",
+          "priceDelta": 0
+        },
+        {
+          "id": "hidden",
+          "label": "Hidden placket",
+          "priceDelta": 900,
+          "leadTimeDays": 1
+        },
+        {
+          "id": "no-placket",
+          "label": "No placket (French front)",
+          "priceDelta": 600
+        }
+      ],
+      "default": "standard"
+    },
+    {
+      "id": "pocket",
+      "label": "Pocket",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "none",
+          "label": "No pocket",
+          "priceDelta": 0
+        },
+        {
+          "id": "single-patch",
+          "label": "Single patch pocket",
+          "priceDelta": 300
+        },
+        {
+          "id": "double-patch",
+          "label": "Double patch pocket",
+          "priceDelta": 600
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "id": "buttons",
+      "label": "Buttons",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "corozo-natural",
+          "label": "Natural corozo",
+          "priceDelta": 0,
+          "swatch": "#E8E0CF"
+        },
+        {
+          "id": "horn-dark",
+          "label": "Dark horn",
+          "priceDelta": 900,
+          "swatch": "#4A3A2A"
+        },
+        {
+          "id": "mother-of-pearl",
+          "label": "Mother of pearl",
+          "priceDelta": 1400,
+          "leadTimeDays": 1,
+          "swatch": "#F2EFE6"
+        }
+      ],
+      "default": "corozo-natural"
+    },
+    {
+      "id": "hem",
+      "label": "Hem",
+      "step": "details",
+      "type": "single",
+      "required": true,
+      "values": [
+        {
+          "id": "curved",
+          "label": "Curved hem",
+          "priceDelta": 0,
+          "description": "Made to be tucked in."
+        },
+        {
+          "id": "straight",
+          "label": "Straight hem",
+          "priceDelta": 0,
+          "description": "Made to be worn out."
+        }
+      ],
+      "default": "curved"
+    }
+  ],
+  "rules": [
+    {
+      "id": "short-sleeve-has-no-cuff",
+      "when": {
+        "group": "sleeve",
+        "valueIn": [
+          "short"
+        ]
+      },
+      "require": {
+        "group": "cuff",
+        "valueIn": [
+          "none"
+        ]
+      },
+      "message": "A short sleeve is finished with a turn-up, so it cannot take a cuff."
+    },
+    {
+      "id": "long-sleeve-needs-cuff",
+      "when": {
+        "group": "sleeve",
+        "valueIn": [
+          "long"
+        ]
+      },
+      "require": {
+        "group": "cuff",
+        "valueIn": [
+          "barrel-single",
+          "barrel-double",
+          "french"
+        ]
+      },
+      "message": "Choose a cuff for the long sleeve."
+    },
+    {
+      "id": "hidden-placket-needs-plain-collar",
+      "when": {
+        "group": "placket",
+        "valueIn": [
+          "hidden"
+        ]
+      },
+      "require": {
+        "group": "collar",
+        "valueIn": [
+          "classic",
+          "cutaway",
+          "band"
+        ]
+      },
+      "message": "A hidden placket is not made with a button-down collar."
+    },
+    {
+      "id": "double-pocket-needs-room",
+      "when": {
+        "group": "pocket",
+        "valueIn": [
+          "double-patch"
+        ]
+      },
+      "require": {
+        "group": "fit",
+        "valueIn": [
+          "relaxed",
+          "oversized"
+        ]
+      },
+      "message": "Double patch pockets are only cut on the relaxed and oversized blocks."
+    },
+    {
+      "id": "oversized-is-worn-out",
+      "when": {
+        "group": "fit",
+        "valueIn": [
+          "oversized"
+        ]
+      },
+      "require": {
+        "group": "hem",
+        "valueIn": [
+          "straight"
+        ]
+      },
+      "message": "The oversized block is finished with a straight hem."
+    }
+  ],
+  "monogram": {
+    "fee": 1200,
+    "leadTimeDays": 2,
+    "maxLength": 4,
+    "positions": [
+      {
+        "id": "cuff-left",
+        "label": "Left cuff",
+        "requiresSleeve": "long"
+      },
+      {
+        "id": "cuff-right",
+        "label": "Right cuff",
+        "requiresSleeve": "long"
+      },
+      {
+        "id": "chest-left",
+        "label": "Left chest"
+      },
+      {
+        "id": "hem-left",
+        "label": "Left hem"
+      },
+      {
+        "id": "collar-inner",
+        "label": "Inside the collar",
+        "forbiddenCollars": [
+          "band"
+        ]
+      }
+    ],
+    "fonts": [
+      {
+        "id": "block-sans",
+        "label": "Block sans"
+      },
+      {
+        "id": "classic-serif",
+        "label": "Classic serif"
+      },
+      {
+        "id": "script",
+        "label": "Script"
+      }
+    ],
+    "threads": [
+      {
+        "id": "tonal-beige",
+        "label": "Tonal beige",
+        "swatch": "#D8CBB4"
+      },
+      {
+        "id": "ivory",
+        "label": "Ivory",
+        "swatch": "#F5F0E6"
+      },
+      {
+        "id": "navy",
+        "label": "Navy",
+        "swatch": "#1F2A44"
+      },
+      {
+        "id": "terracotta",
+        "label": "Terracotta",
+        "swatch": "#B4573A"
+      },
+      {
+        "id": "charcoal",
+        "label": "Charcoal",
+        "swatch": "#3A3A3A"
+      }
+    ]
+  },
+  "measurementFields": [
+    {
+      "id": "neck",
+      "label": "Neck",
+      "unit": "cm",
+      "min": 32,
+      "max": 52,
+      "required": true
+    },
+    {
+      "id": "chest",
+      "label": "Chest",
+      "unit": "cm",
+      "min": 78,
+      "max": 145,
+      "required": true
+    },
+    {
+      "id": "waist",
+      "label": "Waist",
+      "unit": "cm",
+      "min": 60,
+      "max": 140,
+      "required": true
+    },
+    {
+      "id": "hips",
+      "label": "Hips",
+      "unit": "cm",
+      "min": 78,
+      "max": 145,
+      "required": true
+    },
+    {
+      "id": "shoulder",
+      "label": "Shoulder to shoulder",
+      "unit": "cm",
+      "min": 36,
+      "max": 56,
+      "required": true
+    },
+    {
+      "id": "sleeveLength",
+      "label": "Sleeve length",
+      "unit": "cm",
+      "min": 50,
+      "max": 75,
+      "required": true
+    },
+    {
+      "id": "shirtLength",
+      "label": "Shirt length",
+      "unit": "cm",
+      "min": 60,
+      "max": 90,
+      "required": true
+    }
+  ],
+  "sizeChart": {
+    "id": "unisex-shirt-eu",
+    "label": "Shirts — EU sizing",
+    "unit": "cm",
+    "measuredOn": "body",
+    "sizes": [
+      {
+        "size": "xs",
+        "chest": [
+          86,
+          92
+        ],
+        "neck": [
+          35,
+          37
+        ],
+        "waist": [
+          70,
+          78
+        ],
+        "height": [
+          160,
+          172
+        ]
+      },
+      {
+        "size": "s",
+        "chest": [
+          92,
+          98
+        ],
+        "neck": [
+          37,
+          38
+        ],
+        "waist": [
+          78,
+          84
+        ],
+        "height": [
+          166,
+          178
+        ]
+      },
+      {
+        "size": "m",
+        "chest": [
+          98,
+          104
+        ],
+        "neck": [
+          38,
+          39.5
+        ],
+        "waist": [
+          84,
+          90
+        ],
+        "height": [
+          172,
+          184
+        ]
+      },
+      {
+        "size": "l",
+        "chest": [
+          104,
+          112
+        ],
+        "neck": [
+          39.5,
+          41
+        ],
+        "waist": [
+          90,
+          98
+        ],
+        "height": [
+          176,
+          188
+        ]
+      },
+      {
+        "size": "xl",
+        "chest": [
+          112,
+          120
+        ],
+        "neck": [
+          41,
+          43
+        ],
+        "waist": [
+          98,
+          106
+        ],
+        "height": [
+          180,
+          194
+        ]
+      },
+      {
+        "size": "xxl",
+        "chest": [
+          120,
+          130
+        ],
+        "neck": [
+          43,
+          45
+        ],
+        "waist": [
+          106,
+          116
+        ],
+        "height": [
+          184,
+          200
+        ]
+      }
+    ]
+  },
+  "bodyTypes": [
+    "slim",
+    "athletic",
+    "regular",
+    "broad"
+  ],
+  "fitPreferences": [
+    "fitted",
+    "regular",
+    "loose"
+  ],
+  "sizing": {
+    "bodyTypeChestAdjustment": {
+      "slim": -3,
+      "athletic": 2,
+      "regular": 0,
+      "broad": 5
+    },
+    "bodyTypeWaistAdjustment": {
+      "slim": -4,
+      "athletic": -2,
+      "regular": 0,
+      "broad": 4
+    },
+    "fitPreferenceEase": {
+      "fitted": -3,
+      "regular": 0,
+      "loose": 5
+    },
+    "fitBlockEase": {
+      "slim": -2,
+      "tailored": 0,
+      "relaxed": 3,
+      "oversized": 6
+    }
+  },
+  "defaultSelection": {
+    "options": {
+      "size": "m",
+      "fit": "tailored",
+      "fabric": "beige-linen-160",
+      "collar": "classic",
+      "sleeve": "long",
+      "cuff": "barrel-single",
+      "placket": "standard",
+      "pocket": "none",
+      "buttons": "corozo-natural",
+      "hem": "curved"
+    },
+    "measurements": null,
+    "monogram": null
+  },
+  "taxRate": 0.2
+}</script>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Fitting room · Made in Porto</p>
+      <h1 id="title">Beige Linen Shirt</h1>
+      <p class="sub" id="subtitle"></p>
+    </div>
+    <p class="from-price">From<b id="from-price">—</b>incl. VAT</p>
+  </header>
+
+  <div class="layout">
+    <aside class="rail">
+      <figure class="sketch">
+        <svg id="flat" viewBox="0 0 300 372" role="img" aria-label="Flat sketch of the shirt as customised">
+          <g class="variant variant--sleeve-long">
+            <path class="outline" d="M98 66 L42 104 L64 250 L102 234 Z"></path>
+            <path class="outline" d="M202 66 L258 104 L236 250 L198 234 Z"></path>
+          </g>
+          <g class="variant variant--sleeve-short">
+            <path class="outline" d="M98 66 L56 94 L70 150 L100 140 Z"></path>
+            <path class="outline" d="M202 66 L244 94 L230 150 L200 140 Z"></path>
+          </g>
+          <path class="variant variant--hem-curved outline" d="M98 66 L202 66 L210 296 Q150 326 90 296 Z"></path>
+          <path class="variant variant--hem-straight outline" d="M98 66 L202 66 L210 308 L90 308 Z"></path>
+          <g class="variant variant--collar-classic">
+            <path class="outline" d="M124 58 L150 66 L142 104 L120 76 Z"></path>
+            <path class="outline" d="M176 58 L150 66 L158 104 L180 76 Z"></path>
+          </g>
+          <g class="variant variant--collar-cutaway">
+            <path class="outline" d="M116 58 L150 66 L136 92 L110 74 Z"></path>
+            <path class="outline" d="M184 58 L150 66 L164 92 L190 74 Z"></path>
+          </g>
+          <g class="variant variant--collar-band">
+            <path class="outline" d="M126 52 L174 52 L174 68 L150 74 L126 68 Z"></path>
+          </g>
+          <ellipse cx="150" cy="64" rx="24" ry="9" fill="var(--surface)" stroke="#2A2C24" stroke-opacity="0.6" stroke-width="1.2"></ellipse>
+          <g class="variant variant--collar-buttons">
+            <circle class="btn-dot" cx="142" cy="102" r="2.6"></circle>
+            <circle class="btn-dot" cx="158" cy="102" r="2.6"></circle>
+          </g>
+          <path class="variant variant--placket stitch" d="M143 74 L143 300 M157 74 L157 300"></path>
+          <g class="variant variant--buttons">
+            <circle class="btn-dot" cx="150" cy="112" r="3.4"></circle>
+            <circle class="btn-dot" cx="150" cy="152" r="3.4"></circle>
+            <circle class="btn-dot" cx="150" cy="192" r="3.4"></circle>
+            <circle class="btn-dot" cx="150" cy="232" r="3.4"></circle>
+            <circle class="btn-dot" cx="150" cy="272" r="3.4"></circle>
+          </g>
+          <path class="variant variant--buttons-hidden stitch" d="M150 78 L150 296" stroke-dasharray="3 5"></path>
+          <rect class="variant variant--pocket-left outline" x="104" y="126" width="36" height="40" rx="2"></rect>
+          <rect class="variant variant--pocket-right outline" x="160" y="126" width="36" height="40" rx="2"></rect>
+          <text id="mono-mark" class="monogram-mark" x="0" y="0" text-anchor="middle"></text>
+        </svg>
+        <figcaption><span id="sketch-fabric">—</span><span id="sketch-size">—</span></figcaption>
+      </figure>
+
+      <div class="docket">
+        <h2>Docket</h2>
+        <div class="lines" id="lines"></div>
+        <div class="totals" id="totals"></div>
+        <div class="ship">
+          <span>Ships in <b id="lead">—</b></span>
+          <span>around <b id="ship-date">—</b></span>
+        </div>
+        <button class="add" id="add">Add to basket</button>
+        <div id="blockers"></div>
+      </div>
+    </aside>
+
+    <div class="sections">
+      <section id="finder-section">
+        <div class="head"><span class="num">§</span><div><h2>Find your size</h2><p>Two numbers get you close; a tape measure gets you closer.</p></div></div>
+        <div class="finder">
+          <div class="fields">
+            <div class="field"><label for="height">Height</label><input id="height" type="number" value="183" min="120" max="220"><span class="hint">cm</span></div>
+            <div class="field"><label for="weight">Weight</label><input id="weight" type="number" value="84" min="35" max="200"><span class="hint">kg</span></div>
+            <div class="field"><label for="chest">Chest</label><input id="chest" type="number" placeholder="optional" min="70" max="150"><span class="hint">cm, if you have a tape</span></div>
+            <div class="field"><label for="bodyType">Build</label><select id="bodyType"></select></div>
+            <div class="field"><label for="fitPreference">Preferred fit</label><select id="fitPreference"></select></div>
+          </div>
+          <button class="ghost" id="recommend">Recommend a size</button>
+          <div id="verdict"></div>
+        </div>
+      </section>
+
+      <section id="step-size">
+        <div class="head"><span class="num">1</span><div><h2>Your size</h2><p>Stock sizes ship from the warehouse; made to measure is cut for you.</p></div></div>
+        <div id="group-size"></div>
+        <div id="measures-panel"></div>
+      </section>
+
+      <section id="step-fit">
+        <div class="head"><span class="num">2</span><div><h2>Fit</h2><p>How close to the body the shirt should sit.</p></div></div>
+        <div id="group-fit"></div>
+      </section>
+
+      <section id="step-fabric">
+        <div class="head"><span class="num">3</span><div><h2>Fabric</h2><p>Weight, weave and hand-feel of the linen.</p></div></div>
+        <div id="group-fabric"></div>
+      </section>
+
+      <section id="step-details">
+        <div class="head"><span class="num">4</span><div><h2>Details</h2><p>Collar, sleeve, cuff, placket, pocket, buttons and hem.</p></div></div>
+        <div id="group-details"></div>
+      </section>
+
+      <section id="step-monogram">
+        <div class="head"><span class="num">5</span><div><h2>Monogram</h2><p id="mono-fee">Hand-embroidered initials.</p></div></div>
+        <label class="switch"><input type="checkbox" id="mono-on"> Embroider my initials</label>
+        <div id="mono-fields" hidden></div>
+      </section>
+
+      <section id="step-review">
+        <div class="head"><span class="num">6</span><div><h2>Review</h2><p>The make-up as it goes to the atelier.</p></div></div>
+        <table class="recap"><tbody id="recap"></tbody></table>
+        <details class="api">
+          <summary>The request this fitting room sends</summary>
+          <p class="endpoint">POST /api/products/beige-linen-shirt/fitting-room/quote</p>
+          <pre id="payload"></pre>
+        </details>
+      </section>
+
+      <footer class="note">
+        A working demo of the <code>fitting-room</code> Node module. The option catalogue, the tailoring
+        rules, the price deltas, the size chart and the recommendation coefficients on this page are
+        generated from the module's own source by <code>scripts/build-demo.mjs</code>, so what you see
+        here is what the API returns.
+      </footer>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const DATA = JSON.parse(document.getElementById("fr-data").textContent);
+  const groupsById = Object.fromEntries(DATA.groups.map((group) => [group.id, group]));
+  const $ = (id) => document.getElementById(id);
+
+  const money = (minor) =>
+    new Intl.NumberFormat("en-IE", { style: "currency", currency: DATA.product.currency }).format(minor / 100);
+  const signed = (minor) => (minor > 0 ? "+" : "−") + money(Math.abs(minor));
+
+  const state = {
+    options: { ...DATA.defaultSelection.options },
+    measurements: {},
+    monogram: null,
+  };
+
+  /* ── validation: the same rules the module enforces ──────────── */
+  const validate = () => {
+    const issues = [];
+    const add = (field, message) => issues.push({ field, message });
+
+    for (const group of DATA.groups) {
+      if (group.required && !state.options[group.id]) add("options." + group.id, group.label + " is required.");
+    }
+
+    for (const rule of DATA.rules) {
+      if (!groupsById[rule.when.group] || !groupsById[rule.require.group]) continue;
+      if (!rule.when.valueIn.includes(state.options[rule.when.group])) continue;
+      if (!rule.require.valueIn.includes(state.options[rule.require.group])) add("options." + rule.require.group, rule.message);
+    }
+
+    if (state.options.size === "made-to-measure") {
+      for (const field of DATA.measurementFields) {
+        const value = state.measurements[field.id];
+        if (value === undefined || value === "" || Number.isNaN(Number(value))) {
+          add("measurements." + field.id, field.label + " is required for made to measure.");
+        } else if (Number(value) < field.min || Number(value) > field.max) {
+          add("measurements." + field.id, field.label + " must be between " + field.min + " and " + field.max + " " + field.unit + ".");
+        }
+      }
+    }
+
+    if (state.monogram) {
+      if (!/^[A-Z]{1,4}$/.test(state.monogram.text)) add("monogram.text", "Use one to four letters (A–Z).");
+      const position = DATA.monogram.positions.find((item) => item.id === state.monogram.position);
+      if (!position) add("monogram.position", "Choose where the monogram goes.");
+      else if (position.requiresSleeve && state.options.sleeve !== position.requiresSleeve) {
+        add("monogram.position", position.label + " is only embroidered on a " + position.requiresSleeve + " sleeve.");
+      } else if ((position.forbiddenCollars || []).includes(state.options.collar)) {
+        add("monogram.position", position.label + " is not available with that collar.");
+      }
+    }
+
+    return issues;
+  };
+
+  /* ── pricing: base + deltas + monogram, lead time accumulates ── */
+  const price = () => {
+    const lines = [{ label: DATA.product.title, amount: DATA.product.basePrice }];
+    let leadTimeDays = DATA.product.leadTimeDays;
+
+    for (const group of DATA.groups) {
+      const value = (group.values || []).find((candidate) => candidate.id === state.options[group.id]);
+      if (!value) continue;
+      leadTimeDays += value.leadTimeDays || 0;
+      if (value.priceDelta !== 0) lines.push({ label: group.label + ": " + value.label, amount: value.priceDelta });
+    }
+
+    if (state.monogram) {
+      const position = DATA.monogram.positions.find((item) => item.id === state.monogram.position);
+      lines.push({
+        label: 'Monogram "' + (state.monogram.text || "…") + '"' + (position ? " — " + position.label : ""),
+        amount: DATA.monogram.fee,
+      });
+      leadTimeDays += DATA.monogram.leadTimeDays;
+    }
+
+    const unitPrice = lines.reduce((total, line) => total + line.amount, 0);
+    const tax = Math.round(unitPrice * DATA.taxRate);
+    const shipDate = new Date(Date.now() + leadTimeDays * 86400000);
+
+    return { lines, unitPrice, tax, total: unitPrice + tax, leadTimeDays, shipDate };
+  };
+
+  /* ── size recommendation: the module's coefficients ──────────── */
+  const recommend = (profile) => {
+    const { bodyTypeChestAdjustment, bodyTypeWaistAdjustment, fitPreferenceEase, fitBlockEase } = DATA.sizing;
+    const round1 = (value) => Math.round(value * 10) / 10;
+
+    const estimatedChest = round1(
+      52 + 0.62 * profile.weightKg - 0.25 * (profile.heightCm - 178) + (bodyTypeChestAdjustment[profile.bodyType] || 0),
+    );
+    const chest = profile.chestCm || estimatedChest;
+    const waist = round1(chest - 12 + (bodyTypeWaistAdjustment[profile.bodyType] || 0));
+    const neck = round1(0.24 * chest + 13.5);
+    const ease = (fitPreferenceEase[profile.fitPreference] || 0) + (fitBlockEase[state.options.fit] || 0);
+    const effectiveChest = chest + ease;
+
+    const outside = (value, [min, max]) => (value < min ? min - value : value > max ? value - max : 0);
+    const offCentre = (value, [min, max]) => {
+      const half = (max - min) / 2 || 1;
+      return Math.min(1, Math.abs(value - (min + max) / 2) / half);
+    };
+
+    const rows = DATA.sizeChart.sizes;
+    const scored = rows
+      .map((row) => ({
+        size: row.size,
+        row,
+        chestMiss: outside(effectiveChest, row.chest),
+        neckMiss: outside(neck, row.neck),
+        score:
+          outside(effectiveChest, row.chest) * 3 +
+          outside(neck, row.neck) * 2 +
+          outside(waist, row.waist) * 1 +
+          outside(profile.heightCm, row.height) * 0.15 +
+          offCentre(effectiveChest, row.chest) * 0.5,
+      }))
+      .sort((a, b) => a.score - b.score);
+
+    const best = scored[0];
+    const gap = scored[1] ? scored[1].score - best.score : 5;
+    const chartIndex = (size) => rows.findIndex((row) => row.size === size);
+    const neckBest = [...scored].sort((a, b) => a.neckMiss - b.neckMiss || a.score - b.score)[0];
+    const neckOffset = Math.abs(chartIndex(neckBest.size) - chartIndex(best.size));
+
+    let confidence = profile.chestCm ? 0.9 : 0.72;
+    if (gap < 1.5) confidence -= 0.2;
+    if (best.chestMiss > 0) confidence -= 0.25;
+    if (neckOffset >= 2) confidence -= 0.15;
+    confidence = Math.round(Math.min(0.97, Math.max(0.25, confidence)) * 100) / 100;
+
+    const rationale = [
+      profile.chestCm
+        ? "Matched on your chest measurement of " + chest + " cm."
+        : "Estimated a chest of " + chest + " cm from " + profile.heightCm + " cm / " + profile.weightKg + " kg and " +
+          (/^[aeiou]/i.test(profile.bodyType) ? "an " : "a ") + profile.bodyType + " build.",
+      ease !== 0
+        ? "Added " + (ease > 0 ? "+" : "") + ease + " cm of ease for a " + profile.fitPreference + " fit on the " + state.options.fit + " block."
+        : "Used the standard ease for this cut.",
+      "Size " + best.size.toUpperCase() + " covers " + best.row.chest[0] + "–" + best.row.chest[1] + " cm chest.",
+    ];
+    if (best.chestMiss > 0) rationale.push("Your chest sits outside every stock size — made to measure will fit better.");
+    if (neckOffset >= 2) rationale.push("Your neck and chest point at different sizes, which usually means a made-to-measure collar.");
+
+    const alternates = scored.slice(1, 3).map((entry) => ({
+      size: entry.size,
+      reason:
+        entry.score < best.score + 1.5
+          ? "nearly as good a match"
+          : chartIndex(entry.size) > chartIndex(best.size)
+            ? "more room through the chest"
+            : "a closer fit",
+    }));
+
+    return { size: best.size, confidence, rationale, alternates, madeToMeasureSuggested: confidence < 0.6 || best.chestMiss > 0 || neckOffset >= 2 };
+  };
+
+  /* ── building the controls ───────────────────────────────────── */
+  const chipsFor = (groupId) => {
+    const group = groupsById[groupId];
+    const wrap = document.createElement("div");
+    wrap.className = "group";
+    wrap.dataset.group = groupId;
+    wrap.innerHTML = '<span class="glabel">' + group.label + "</span>";
+
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    for (const value of group.values) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.dataset.value = value.id;
+      chip.setAttribute("aria-pressed", String(state.options[groupId] === value.id));
+      chip.innerHTML =
+        "<span>" + value.label + "</span>" +
+        (value.priceDelta ? '<span class="delta">' + signed(value.priceDelta) + "</span>" : "");
+      chip.addEventListener("click", () => {
+        state.options[groupId] = value.id;
+        render();
+      });
+      chips.append(chip);
+    }
+    wrap.append(chips);
+    return wrap;
+  };
+
+  const swatchesFor = (groupId) => {
+    const group = groupsById[groupId];
+    const wrap = document.createElement("div");
+    wrap.className = "group";
+    wrap.dataset.group = groupId;
+
+    const grid = document.createElement("div");
+    grid.className = "swatches";
+    for (const value of group.values) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "swatch";
+      card.dataset.value = value.id;
+      card.setAttribute("aria-pressed", String(state.options[groupId] === value.id));
+      const meta = value.meta || {};
+      card.innerHTML =
+        '<i style="background:' + (value.swatch || "#ccc") + '"></i>' +
+        "<span><span class=\"name\">" + value.label + "</span>" +
+        '<span class="meta">' + (meta.composition || value.description || "") + "</span>" +
+        (value.priceDelta ? '<span class="delta">' + signed(value.priceDelta) + "</span>" : "") +
+        "</span>";
+      card.addEventListener("click", () => {
+        state.options[groupId] = value.id;
+        render();
+      });
+      grid.append(card);
+    }
+    wrap.append(grid);
+    return wrap;
+  };
+
+  const buildMeasures = () => {
+    const panel = document.createElement("div");
+    panel.className = "measures";
+    panel.innerHTML =
+      "<h3>Your measurements</h3><p>Measured on the body, in centimetres. Our tailor adds the ease.</p>";
+    const fields = document.createElement("div");
+    fields.className = "fields";
+    for (const field of DATA.measurementFields) {
+      const wrap = document.createElement("div");
+      wrap.className = "field";
+      wrap.dataset.measurement = field.id;
+      wrap.innerHTML =
+        '<label for="m-' + field.id + '">' + field.label + "</label>" +
+        '<input id="m-' + field.id + '" type="number" min="' + field.min + '" max="' + field.max + '" step="0.5">' +
+        '<span class="hint">' + field.min + "–" + field.max + " " + field.unit + "</span>";
+      const input = wrap.querySelector("input");
+      input.value = state.measurements[field.id] ?? "";
+      input.addEventListener("input", () => {
+        if (input.value === "") delete state.measurements[field.id];
+        else state.measurements[field.id] = Number(input.value);
+        render();
+      });
+      fields.append(wrap);
+    }
+    panel.append(fields);
+    return panel;
+  };
+
+  const buildMonogramFields = () => {
+    const wrap = $("mono-fields");
+    wrap.innerHTML = "";
+    const grid = document.createElement("div");
+    grid.className = "mono-grid";
+
+    const text = document.createElement("div");
+    text.className = "field";
+    text.dataset.monogram = "text";
+    text.innerHTML =
+      '<label for="mono-text">Initials</label><input id="mono-text" maxlength="' + DATA.monogram.maxLength + '" placeholder="JD"><span class="hint">up to ' + DATA.monogram.maxLength + " letters</span>";
+    grid.append(text);
+
+    const position = document.createElement("div");
+    position.className = "field";
+    position.dataset.monogram = "position";
+    position.innerHTML =
+      '<label for="mono-position">Placement</label><select id="mono-position">' +
+      DATA.monogram.positions.map((item) => '<option value="' + item.id + '">' + item.label + "</option>").join("") +
+      "</select>";
+    grid.append(position);
+
+    const font = document.createElement("div");
+    font.className = "field";
+    font.innerHTML =
+      '<label for="mono-font">Lettering</label><select id="mono-font">' +
+      DATA.monogram.fonts.map((item) => '<option value="' + item.id + '">' + item.label + "</option>").join("") +
+      "</select>";
+    grid.append(font);
+
+    const thread = document.createElement("div");
+    thread.className = "field";
+    thread.innerHTML = "<label>Thread</label>";
+    const threads = document.createElement("div");
+    threads.className = "threads";
+    for (const item of DATA.monogram.threads) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "thread";
+      dot.dataset.thread = item.id;
+      dot.style.background = item.swatch;
+      dot.title = item.label;
+      dot.setAttribute("aria-label", item.label);
+      dot.addEventListener("click", () => {
+        state.monogram.thread = item.id;
+        render();
+      });
+      threads.append(dot);
+    }
+    thread.append(threads);
+    grid.append(thread);
+    wrap.append(grid);
+
+    text.querySelector("input").addEventListener("input", (event) => {
+      state.monogram.text = event.target.value.toUpperCase().trim();
+      render();
+    });
+    position.querySelector("select").addEventListener("change", (event) => {
+      state.monogram.position = event.target.value;
+      render();
+    });
+    font.querySelector("select").addEventListener("change", (event) => {
+      state.monogram.font = event.target.value;
+      render();
+    });
+  };
+
+  /* ── the flat sketch ─────────────────────────────────────────── */
+  const MONOGRAM_ANCHORS = {
+    "cuff-left": { x: 78, y: 228 },
+    "cuff-right": { x: 222, y: 228 },
+    "chest-left": { x: 122, y: 196 },
+    "hem-left": { x: 112, y: 284 },
+    "collar-inner": { x: 150, y: 48 },
+  };
+
+  const paintSketch = () => {
+    const svg = $("flat");
+    const fabric = groupsById.fabric.values.find((value) => value.id === state.options.fabric);
+    const button = groupsById.buttons.values.find((value) => value.id === state.options.buttons);
+    svg.style.setProperty("--cloth", (fabric && fabric.swatch) || "#D8CBB4");
+    svg.style.setProperty("--button", (button && button.swatch) || "#E8E0CF");
+    svg.dataset.sleeve = state.options.sleeve;
+    svg.dataset.hem = state.options.hem;
+    svg.dataset.collar = state.options.collar;
+    svg.dataset.placket = state.options.placket;
+    svg.dataset.pocket = state.options.pocket;
+
+    const mark = $("mono-mark");
+    const anchor = state.monogram ? MONOGRAM_ANCHORS[state.monogram.position] : null;
+    if (state.monogram && state.monogram.text && anchor) {
+      const thread = DATA.monogram.threads.find((item) => item.id === state.monogram.thread);
+      mark.textContent = state.monogram.text;
+      mark.setAttribute("x", anchor.x);
+      mark.setAttribute("y", anchor.y);
+      mark.style.setProperty("--thread", (thread && thread.swatch) || "#1F2A44");
+      mark.style.display = "block";
+    } else {
+      mark.style.display = "none";
+    }
+
+    $("sketch-fabric").textContent = fabric ? fabric.label : "—";
+    const size = groupsById.size.values.find((value) => value.id === state.options.size);
+    $("sketch-size").textContent = size ? size.label : "—";
+  };
+
+  /* ── render ──────────────────────────────────────────────────── */
+  const render = () => {
+    const issues = validate();
+    const quote = price();
+
+    document.querySelectorAll(".group").forEach((wrap) => {
+      const groupId = wrap.dataset.group;
+      wrap.querySelectorAll("[data-value]").forEach((control) => {
+        control.setAttribute("aria-pressed", String(state.options[groupId] === control.dataset.value));
+      });
+      wrap.querySelectorAll(".issue").forEach((node) => node.remove());
+      const groupIssue = issues.find((item) => item.field === "options." + groupId);
+      wrap.querySelectorAll(".chip").forEach((chip) => chip.classList.toggle("flagged", Boolean(groupIssue) && chip.getAttribute("aria-pressed") === "true"));
+      if (groupIssue) {
+        const note = document.createElement("p");
+        note.className = "issue";
+        note.textContent = groupIssue.message;
+        wrap.append(note);
+      }
+    });
+
+    const measuresPanel = $("measures-panel");
+    const needsMeasurements = state.options.size === "made-to-measure";
+    if (needsMeasurements && !measuresPanel.firstChild) measuresPanel.append(buildMeasures());
+    if (!needsMeasurements) measuresPanel.innerHTML = "";
+    measuresPanel.querySelectorAll("[data-measurement]").forEach((field) => {
+      const issue = issues.find((item) => item.field === "measurements." + field.dataset.measurement);
+      field.querySelector("input").classList.toggle("bad", Boolean(issue) && state.measurements[field.dataset.measurement] !== undefined);
+    });
+
+    $("mono-fields").hidden = !state.monogram;
+    $("mono-on").checked = Boolean(state.monogram);
+    if (state.monogram) {
+      const textInput = $("mono-text");
+      if (textInput && document.activeElement !== textInput) textInput.value = state.monogram.text;
+      if ($("mono-position")) $("mono-position").value = state.monogram.position;
+      if ($("mono-font")) $("mono-font").value = state.monogram.font;
+      document.querySelectorAll(".thread").forEach((dot) => dot.setAttribute("aria-pressed", String(dot.dataset.thread === state.monogram.thread)));
+      $("mono-fields").querySelectorAll(".issue").forEach((node) => node.remove());
+      for (const key of ["text", "position"]) {
+        const issue = issues.find((item) => item.field === "monogram." + key);
+        const host = $("mono-fields").querySelector('[data-monogram="' + key + '"]');
+        if (issue && host) {
+          const note = document.createElement("p");
+          note.className = "issue";
+          note.textContent = issue.message;
+          host.append(note);
+        }
+      }
+    }
+
+    $("lines").innerHTML = quote.lines
+      .map((line, index) =>
+        '<div><span class="label">' + line.label + '</span><span class="amt' + (index && line.amount > 0 ? " plus" : "") + '">' +
+        (index === 0 ? money(line.amount) : signed(line.amount)) + "</span></div>",
+      )
+      .join("");
+
+    $("totals").innerHTML =
+      '<div><span>Subtotal</span><span class="amt">' + money(quote.unitPrice) + "</span></div>" +
+      '<div><span>VAT ' + Math.round(DATA.taxRate * 100) + '%</span><span class="amt">' + money(quote.tax) + "</span></div>" +
+      '<div class="grand"><span>Total</span><span class="amt">' + money(quote.total) + "</span></div>";
+
+    $("lead").textContent = quote.leadTimeDays + " days";
+    $("ship-date").textContent = quote.shipDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
+    $("add").disabled = issues.length > 0;
+    $("blockers").innerHTML = issues
+      .slice(0, 3)
+      .map((issue) => '<p class="blocker">' + issue.message + "</p>")
+      .join("");
+
+    const recap = DATA.groups
+      .filter((group) => state.options[group.id])
+      .map((group) => {
+        const value = group.values.find((candidate) => candidate.id === state.options[group.id]);
+        return "<tr><td>" + group.label + "</td><td>" + (value ? value.label : state.options[group.id]) + "</td></tr>";
+      });
+    if (needsMeasurements) {
+      const filled = DATA.measurementFields
+        .filter((field) => state.measurements[field.id] !== undefined)
+        .map((field) => field.label + " " + state.measurements[field.id]);
+      recap.push("<tr><td>Measurements</td><td>" + (filled.length ? filled.join(", ") + " cm" : "—") + "</td></tr>");
+    }
+    if (state.monogram) {
+      const position = DATA.monogram.positions.find((item) => item.id === state.monogram.position);
+      recap.push("<tr><td>Monogram</td><td>" + (state.monogram.text || "—") + " · " + (position ? position.label : "") + "</td></tr>");
+    }
+    $("recap").innerHTML = recap.join("");
+
+    $("payload").textContent = JSON.stringify(
+      {
+        options: state.options,
+        measurements: needsMeasurements ? state.measurements : null,
+        monogram: state.monogram,
+        quantity: 1,
+      },
+      null,
+      2,
+    );
+
+    paintSketch();
+  };
+
+  /* ── wiring ──────────────────────────────────────────────────── */
+  $("title").textContent = DATA.product.title;
+  $("subtitle").textContent = DATA.product.subtitle;
+  $("from-price").textContent = money(DATA.product.basePrice + Math.round(DATA.product.basePrice * DATA.taxRate));
+  $("mono-fee").textContent = "Hand-embroidered initials, " + money(DATA.monogram.fee) + " and " + DATA.monogram.leadTimeDays + " extra days in the atelier.";
+
+  $("group-size").append(chipsFor("size"));
+  $("group-fit").append(chipsFor("fit"));
+  $("group-fabric").append(swatchesFor("fabric"));
+  for (const groupId of ["collar", "sleeve", "cuff", "placket", "pocket", "buttons", "hem"]) {
+    $("group-details").append(chipsFor(groupId));
+  }
+
+  $("bodyType").innerHTML = DATA.bodyTypes
+    .map((type) => '<option value="' + type + '"' + (type === "athletic" ? " selected" : "") + ">" + type[0].toUpperCase() + type.slice(1) + "</option>")
+    .join("");
+  $("fitPreference").innerHTML = DATA.fitPreferences
+    .map((pref) => '<option value="' + pref + '"' + (pref === "regular" ? " selected" : "") + ">" + pref[0].toUpperCase() + pref.slice(1) + "</option>")
+    .join("");
+
+  $("mono-on").addEventListener("change", (event) => {
+    if (event.target.checked) {
+      state.monogram = { text: "", position: "chest-left", font: DATA.monogram.fonts[0].id, thread: DATA.monogram.threads[0].id };
+      buildMonogramFields();
+    } else {
+      state.monogram = null;
+    }
+    render();
+  });
+
+  const showVerdict = () => {
+    const heightCm = Number($("height").value);
+    const weightKg = Number($("weight").value);
+    const chestCm = $("chest").value === "" ? null : Number($("chest").value);
+
+    if (!(heightCm >= 120 && heightCm <= 220) || !(weightKg >= 35 && weightKg <= 200)) {
+      $("verdict").innerHTML = '<p class="issue">Height must be 120–220 cm and weight 35–200 kg.</p>';
+      return;
+    }
+
+    const result = recommend({
+      heightCm,
+      weightKg,
+      chestCm,
+      bodyType: $("bodyType").value,
+      fitPreference: $("fitPreference").value,
+    });
+
+    $("verdict").innerHTML =
+      '<div class="verdict"><div><div class="size">' + result.size.toUpperCase() + "</div></div><div>" +
+      '<p class="conf">Confidence ' + Math.round(result.confidence * 100) + "%</p>" +
+      '<div class="meter"><span style="width:' + Math.round(result.confidence * 100) + '%"></span></div>' +
+      "<ul>" + result.rationale.map((reason) => "<li>" + reason + "</li>").join("") + "</ul>" +
+      '<div class="alts"><button class="ghost small" data-apply="' + result.size + '">Cut in ' + result.size.toUpperCase() + "</button>" +
+      result.alternates.map((alt) => '<button class="ghost small" data-apply="' + alt.size + '">' + alt.size.toUpperCase() + " — " + alt.reason + "</button>").join("") +
+      (result.madeToMeasureSuggested ? '<button class="ghost small" data-apply="made-to-measure">Go made to measure</button>' : "") +
+      "</div></div></div>";
+
+    $("verdict").querySelectorAll("[data-apply]").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.options.size = button.dataset.apply;
+        render();
+        $("step-size").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      });
+    });
+  };
+
+  $("recommend").addEventListener("click", showVerdict);
+
+  let toastTimer;
+  $("add").addEventListener("click", () => {
+    const quote = price();
+    const toast = $("toast");
+    toast.textContent =
+      "Added — " + money(quote.total) + ", ships in " + quote.leadTimeDays + " days. Variant " +
+      Array.from(JSON.stringify(state.options)).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7).toString(16).padStart(8, "0");
+    toast.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("on"), 4200);
+  });
+
+  render();
+  showVerdict();
+})();
+</script>

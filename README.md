@@ -32,6 +32,18 @@ Trousers*) included to prove that the catalogue is per-product configurable.
 
 Zero runtime dependencies. Node 20+.
 
+## Demo
+
+A working demo storefront — pick a size, a fabric and a make-up, and watch the price, the
+tailoring rules and the lead time respond:
+
+**https://claude.ai/code/artifact/777e85ca-a12c-48ea-a087-c4bc616a1d0f**
+
+The page is static and ships in `demo/index.html`; open it straight from disk if you prefer.
+Its catalogue, rules, size chart and sizing coefficients are generated from the module's own
+source by `node scripts/build-demo.mjs`, so it cannot drift from the API — re-run that after
+changing `catalog.js` or `data/products.json`.
+
 ## Getting started
 
 ```bash
@@ -50,6 +62,9 @@ src/
   http/router.js               tiny zero-dependency router + JSON handling
   data/products.json           products and their fitting-room configuration
   data/size-charts.json        body measurement ranges per size
+demo/template.html             demo storefront markup, with a data placeholder
+demo/index.html                the built demo page (generated — do not edit by hand)
+scripts/build-demo.mjs         bakes the live catalogue into the demo page
   modules/fitting-room/
     catalog.js                 option groups, values, prices, rules, monogram, measurements
     repository.js              product lookup, per-product option resolution, defaults

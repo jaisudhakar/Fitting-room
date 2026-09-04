@@ -12,7 +12,7 @@ export {
   resolveGroups,
   resolveSteps,
 } from './repository.js';
-export { estimateMeasurements, recommendSize } from './sizing.js';
+export { SIZING_CONSTANTS, estimateMeasurements, recommendSize } from './sizing.js';
 export {
   InMemorySessionStore,
   getSessionStore,
