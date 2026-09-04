@@ -14,14 +14,18 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "shopify:setup": "node scripts/shopify-setup.mjs",
+    "demo:build": "node scripts/build-demo.mjs"
   },
   "keywords": [
     "ecommerce",
     "fitting-room",
     "product-customization",
     "made-to-measure",
-    "size-recommendation"
+    "size-recommendation",
+    "shopify",
+    "virtual-try-on"
   ],
   "license": "MIT"
 }

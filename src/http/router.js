@@ -23,6 +23,24 @@ const patternToRegex = (pattern) => {
   return { regex: new RegExp(`^${source}/?$`), names };
 };
 
+/** The unparsed body — webhooks are signed over the exact bytes Shopify sent. */
+export const readRawBody = (req) =>
+  new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        reject(new FittingRoomError('Request body is too large.', { status: 413, code: 'payload_too_large' }));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+
 const readBody = (req) =>
   new Promise((resolve, reject) => {
     if (req.method === 'GET' || req.method === 'HEAD') {
@@ -68,16 +86,21 @@ const sendJson = (res, status, payload) => {
 export class Router {
   #routes = [];
 
-  add(method, pattern, handler) {
+  /**
+   * @param {object} [options]
+   * @param {boolean} [options.raw] hand the handler the unparsed bytes instead
+   *   of a parsed JSON body — needed wherever a signature covers the raw body.
+   */
+  add(method, pattern, handler, options = {}) {
     const { regex, names } = patternToRegex(pattern);
-    this.#routes.push({ method, pattern, regex, names, handler });
+    this.#routes.push({ method, pattern, regex, names, handler, raw: Boolean(options.raw) });
     return this;
   }
 
-  get(pattern, handler) { return this.add('GET', pattern, handler); }
-  post(pattern, handler) { return this.add('POST', pattern, handler); }
-  patch(pattern, handler) { return this.add('PATCH', pattern, handler); }
-  delete(pattern, handler) { return this.add('DELETE', pattern, handler); }
+  get(pattern, handler, options) { return this.add('GET', pattern, handler, options); }
+  post(pattern, handler, options) { return this.add('POST', pattern, handler, options); }
+  patch(pattern, handler, options) { return this.add('PATCH', pattern, handler, options); }
+  delete(pattern, handler, options) { return this.add('DELETE', pattern, handler, options); }
 
   get routes() {
     return this.#routes.map(({ method, pattern }) => ({ method, pattern }));
@@ -120,8 +143,9 @@ export class Router {
       const params = Object.fromEntries(matched.route.names.map((name, index) => [name, decodeURIComponent(matched.match[index + 1])]));
 
       try {
-        const body = await readBody(req);
-        const result = await matched.route.handler({ params, query: url.searchParams, body, req, res });
+        const rawBody = matched.route.raw ? await readRawBody(req) : null;
+        const body = matched.route.raw ? null : await readBody(req);
+        const result = await matched.route.handler({ params, query: url.searchParams, body, rawBody, req, res });
         if (res.writableEnded) return;
         if (result === undefined) {
           res.writeHead(204).end();

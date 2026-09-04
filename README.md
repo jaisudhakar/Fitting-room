@@ -30,6 +30,7 @@ Trousers*) included to prove that the catalogue is per-product configurable.
 | Cart line with a stable `variantKey` for basket de-duplication | `service.js` |
 | Dependency-free JSON HTTP API | `http/router.js`, `routes.js`, `controller.js` |
 | Try-on rail: up to six validated picks per look | `try-on/service.js` |
+| Shopify: metafield-driven catalogue, signed quotes, cart transform pricing | `adapters/shopify/`, `shopify/` |
 | Prompt written from the make-up, not the product name | `try-on/prompt.js` |
 | Google image generation with the shopper's own key, errors translated | `try-on/providers/google.js` |
 
@@ -97,11 +98,93 @@ curl -s -X POST localhost:3000/api/try-on/sessions/$SESSION/looks \
 Configure with `TRY_ON_PROVIDER` (`google` \| `preview`), `TRY_ON_MODEL`
 (default `gemini-2.5-flash-image`) and `GOOGLE_API_KEY`.
 
+## On Shopify
+
+The same modules run as a Shopify app. Nothing about the pricing, the rules or the try-on
+changes — only where products come from and how the storefront reaches them.
+
+```
+Storefront (theme app extension)
+   │  /apps/fitting-room/*        signed by Shopify's app proxy
+   ▼
+This service ──── Admin API ────► product metafield  fitting_room.config
+   │                                (the option catalogue for that garment)
+   │  writes signed cart line properties
+   ▼
+Cart ──► Cart Transform function ──► the customised price and title at checkout
+   │
+   └──► orders/create webhook ──► every customised line re-priced, mismatches tagged
+```
+
+### The five pieces
+
+1. **Product metafield `fitting_room.config`** (JSON) holds what a garment can be
+   customised with. The merchant can read and edit it in the admin; the module reads it
+   through `src/adapters/shopify/productMapper.js`. No second database.
+2. **App proxy routes** (`src/adapters/shopify/proxyRoutes.js`) serve the storefront:
+   `/config`, `/quote`, `/size`, and the whole try-on. Every request is verified against
+   the app secret before it is answered.
+3. **The quote endpoint is the money.** The browser never computes a price: it posts a
+   make-up and gets back the price *and* the cart line properties, already signed.
+4. **Cart Transform function** (`shopify/extensions/fitting-room-pricing`) reads
+   `_fitting_room_unit` off the line and sets `fixedPricePerUnit`, plus a line title that
+   spells out the make-up. It does no arithmetic — pricing stays in one place.
+5. **`orders/create` webhook** re-prices every customised line from its own properties and
+   tags the order `fitting-room-price-mismatch` when the numbers disagree.
+
+### The tamper question, honestly
+
+Cart line properties are written by the browser, so a determined customer can edit the
+price a line claims. A cart transform cannot verify a signature — a function has no crypto
+and no network — so this integration **detects** tampering at order time rather than
+preventing it: the quote is signed (`_fitting_room_sig`), and the webhook re-prices every
+line and flags mismatches for review before fulfilment.
+
+If prevention is required rather than detection, replace "add to cart" with a **draft
+order** created server-side from the quote and send the customer to its invoice URL. The
+same `quoteSelection` output feeds it; the trade-off is losing the native cart and the
+themes' cart drawer.
+
+### Setting it up
+
+```bash
+export SHOPIFY_SHOP=your-store.myshopify.com
+export SHOPIFY_ADMIN_TOKEN=shpat_…      # from the app's admin API access
+export SHOPIFY_APP_SECRET=shpss_…       # the app's client secret
+export SHOPIFY_API_VERSION=2026-01
+
+npm run shopify:setup definition                 # install the metafield definition
+npm run shopify:setup config beige-linen-shirt   # put a fitting room on a product
+npm run shopify:setup check                      # list the products that have one
+npm start                                        # the service, now in Shopify mode
+```
+
+Then, from `shopify/`:
+
+```bash
+shopify app deploy      # theme app extension + cart transform function
+```
+
+and in the admin: add the **Fitting room** block to the product template, and create the
+cart transform (`cartTransformCreate`, which needs `write_cart_transforms` and Checkout
+Extensibility on the shop).
+
+Scopes: `read_products`, `write_products`, `write_cart_transforms`, `read_orders`.
+
+| Variable | Purpose |
+| --- | --- |
+| `SHOPIFY_SHOP` / `SHOPIFY_ADMIN_TOKEN` | Admin API access; their presence switches the service into Shopify mode |
+| `SHOPIFY_APP_SECRET` | Verifies proxy requests and webhooks, and signs quotes |
+| `SHOPIFY_API_VERSION` | Admin API version (default `2026-01`) |
+| `SHOPIFY_PROXY_PREFIX` | Must match the app proxy subpath (default `/apps/fitting-room`) |
+| `SHOPIFY_PRODUCT_CACHE_TTL_MS` | How long a product's config is trusted before refetching |
+| `SHOPIFY_VERIFY_PROXY=false` | Development only — skips signature checks |
+
 ## Getting started
 
 ```bash
 npm start                          # http://localhost:3000
-npm test                           # 90 tests, node:test
+npm test                           # 121 tests, node:test
 node examples/fitting-room-flow.js # the whole flow, no server needed
 ```
 
@@ -115,6 +198,21 @@ src/
   http/router.js               tiny zero-dependency router + JSON handling
   data/products.json           products and their fitting-room configuration
   data/size-charts.json        body measurement ranges per size
+  adapters/shopify/
+    config.js                  environment, endpoints, proxy prefix
+    auth.js                    proxy signatures, webhook HMAC, signed quotes
+    adminClient.js             Admin GraphQL, throttling and userErrors handled
+    metafields.js              the fitting_room.config definition and queries
+    productMapper.js           Shopify product ⇄ module product
+    productSource.js           cached product source, warmed at boot
+    lineItems.js               cart line properties, and the audit that re-prices them
+    webhooks.js                orders/create: re-price and flag
+    proxyRoutes.js             storefront routes behind the app proxy
+    install.js                 turn the service into the app's backend
+shopify/
+  shopify.app.toml             scopes, app proxy, webhooks
+  extensions/fitting-room-ui/  theme app extension: the product-page block
+  extensions/fitting-room-pricing/  cart transform function
 demo/template.html             demo storefront markup, with a data placeholder
 demo/index.html                the built demo page (generated — do not edit by hand)
 scripts/build-demo.mjs         bakes the live catalogue into the demo page
@@ -277,5 +375,7 @@ npm test
 `test/validator.test.js` (rules, measurements, monogram), `test/pricing.test.js` (money,
 VAT, lead time), `test/sizing.test.js` (estimation and recommendation),
 `test/service.test.js` (sessions, merging, cart lines), `test/try-on.test.js` (the rail, the
-prompt, and every Google failure mapped through an injected `fetch`) and `test/api.test.js`
-(the HTTP surface, against a real server). No test touches the network.
+prompt, and every Google failure mapped through an injected `fetch`), `test/shopify.test.js`
+(proxy signatures, webhook HMAC, product mapping, the cached source, the Admin client, cart
+line tampering and the cart transform function) and `test/api.test.js` (the HTTP surface,
+against a real server). No test touches the network.

@@ -7,11 +7,32 @@ import { NotFoundError } from './errors.js';
 const readJson = (relativePath) =>
   JSON.parse(readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), 'utf8'));
 
-const products = readJson('../../data/products.json');
+const bundledProducts = readJson('../../data/products.json');
 const sizeCharts = readJson('../../data/size-charts.json');
 
+/**
+ * Where products come from. The bundled JSON is the default; a storefront
+ * adapter (see `src/adapters/shopify`) swaps in its own source with
+ * `setProductSource`, and the rest of the module never knows the difference.
+ *
+ * The source is synchronous on purpose: an adapter that talks to a remote API
+ * keeps a cache and warms it before the request reaches these functions.
+ *
+ * @typedef {{list: () => object[], find: (slug: string) => object|null}} ProductSource
+ */
+let source = {
+  list: () => bundledProducts,
+  find: (slug) => bundledProducts.find((product) => product.slug === slug) ?? null,
+};
+
+export const setProductSource = (nextSource) => {
+  source = nextSource;
+};
+
+export const getProductSource = () => source;
+
 export const listProducts = () =>
-  products.map(({ id, slug, title, subtitle, currency, basePrice, fittingRoom }) => ({
+  source.list().map(({ id, slug, title, subtitle, currency, basePrice, fittingRoom }) => ({
     id,
     slug,
     title,
@@ -21,7 +42,7 @@ export const listProducts = () =>
     fittingRoomEnabled: Boolean(fittingRoom?.enabled),
   }));
 
-export const findProductBySlug = (slug) => products.find((product) => product.slug === slug) ?? null;
+export const findProductBySlug = (slug) => source.find(slug);
 
 export const getProductBySlug = (slug) => {
   const product = findProductBySlug(slug);

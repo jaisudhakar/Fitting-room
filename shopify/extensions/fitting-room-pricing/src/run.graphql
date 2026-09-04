@@ -1,0 +1,19 @@
+query RunInput {
+  cart {
+    lines {
+      id
+      quantity
+      cost {
+        amountPerQuantity {
+          amount
+        }
+      }
+      unitPrice: attribute(key: "_fitting_room_unit") {
+        value
+      }
+      summary: attribute(key: "_fitting_room_summary") {
+        value
+      }
+    }
+  }
+}

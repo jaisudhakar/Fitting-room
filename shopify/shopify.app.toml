@@ -1,0 +1,33 @@
+# Shopify app configuration for the fitting room.
+# Deploy with:  shopify app deploy
+name = "fitting-room"
+client_id = "REPLACE_WITH_YOUR_CLIENT_ID"
+application_url = "https://fitting-room.example.com"
+embedded = true
+
+[access_scopes]
+# read_products      — read the product and its fitting room metafield
+# write_products     — write the fitting room configuration onto a product
+# write_cart_transforms — install the cart transform that prices the make-up
+# read_orders        — re-price customised lines when an order comes in
+scopes = "read_products,write_products,write_cart_transforms,read_orders"
+
+[auth]
+redirect_urls = ["https://fitting-room.example.com/auth/callback"]
+
+[webhooks]
+api_version = "2026-01"
+
+  [[webhooks.subscriptions]]
+  topics = ["orders/create"]
+  uri = "/webhooks/orders-create"
+
+# The storefront reaches the service through this proxy, so requests arrive
+# signed and same-origin. Keep the prefix in step with SHOPIFY_PROXY_PREFIX.
+[app_proxy]
+url = "https://fitting-room.example.com/apps/fitting-room"
+subpath = "fitting-room"
+prefix = "apps"
+
+[build]
+include_config_on_deploy = true

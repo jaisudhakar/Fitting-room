@@ -1,0 +1,66 @@
+{% comment %}
+  Fitting room — app block for the product page.
+
+  Everything it shows comes from the app proxy, so the option catalogue, the
+  rules and the price all stay on the server: the theme never hard-codes a
+  price or a fabric list.
+{% endcomment %}
+
+<div
+  class="fitting-room"
+  data-fitting-room
+  data-product="{{ product.handle }}"
+  data-variant="{{ product.selected_or_first_available_variant.id }}"
+  data-proxy="{{ block.settings.proxy_path | default: '/apps/fitting-room' }}"
+  data-try-on="{{ block.settings.enable_try_on }}"
+  data-cart-redirect="{{ block.settings.cart_redirect }}"
+>
+  <h2 class="fitting-room__heading">{{ block.settings.heading | default: 'Fitting room' }}</h2>
+  <p class="fitting-room__intro" data-fr-intro>{{ block.settings.intro }}</p>
+
+  <div class="fitting-room__steps" data-fr-steps>
+    <p class="fitting-room__loading">Opening the fitting room…</p>
+  </div>
+
+  <div class="fitting-room__summary" data-fr-summary hidden>
+    <div class="fitting-room__price">
+      <span data-fr-total></span>
+      <small data-fr-lead></small>
+    </div>
+    <ul class="fitting-room__issues" data-fr-issues hidden></ul>
+    <button type="button" class="fitting-room__add" data-fr-add disabled>
+      {{ block.settings.add_label | default: 'Add to basket' }}
+    </button>
+  </div>
+
+  {% if block.settings.enable_try_on %}
+    <div class="fitting-room__tryon" data-fr-tryon hidden>
+      <div class="fitting-room__stage" data-fr-stage></div>
+      <div class="fitting-room__picks" data-fr-picks></div>
+      <div class="fitting-room__tryon-actions">
+        <button type="button" data-fr-hang>Wear this make-up</button>
+        <button type="button" data-fr-draw disabled>Draw the look</button>
+        <button type="button" data-fr-reset>Start over</button>
+      </div>
+      <p class="fitting-room__error" data-fr-tryon-error hidden></p>
+    </div>
+  {% endif %}
+</div>
+
+{{ 'fitting-room.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'fitting-room.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Fitting room",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Fitting room" },
+    { "type": "text", "id": "intro", "label": "Intro", "default": "Cut it the way you want it." },
+    { "type": "text", "id": "add_label", "label": "Add to cart label", "default": "Add to basket" },
+    { "type": "text", "id": "proxy_path", "label": "App proxy path", "default": "/apps/fitting-room" },
+    { "type": "checkbox", "id": "enable_try_on", "label": "Show the try-on", "default": true },
+    { "type": "checkbox", "id": "cart_redirect", "label": "Go to the cart after adding", "default": false }
+  ]
+}
+{% endschema %}

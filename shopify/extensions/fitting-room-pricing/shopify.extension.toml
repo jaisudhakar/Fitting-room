@@ -1,0 +1,15 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Fitting room pricing"
+handle = "fitting-room-pricing"
+type = "function"
+
+  [[extensions.targeting]]
+  target = "purchase.cart-transform.run"
+  input_query = "src/run.graphql"
+  export = "cartTransformRun"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"

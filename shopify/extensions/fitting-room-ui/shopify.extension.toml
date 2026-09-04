@@ -1,0 +1,6 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Fitting room"
+handle = "fitting-room-ui"
+type = "theme"

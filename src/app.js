@@ -6,6 +6,9 @@ import { sweepSessions } from './modules/fitting-room/session.js';
 import { registerTryOnRoutes } from './modules/try-on/routes.js';
 import { sweepTryOn } from './modules/try-on/session.js';
 
+/** True when the environment carries Shopify credentials. */
+export const shopifyConfigured = () => Boolean(process.env.SHOPIFY_SHOP && process.env.SHOPIFY_ADMIN_TOKEN);
+
 /**
  * Build the HTTP application. Returns the node server plus the router, so a
  * host app can either listen on it or reuse `router.handler()` behind its own

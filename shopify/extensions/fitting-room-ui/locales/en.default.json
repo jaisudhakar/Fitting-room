@@ -1,0 +1,11 @@
+{
+  "fitting_room": {
+    "open": "Try the fitting room",
+    "title": "Fitting room",
+    "hint": "Tap the hanger on any product to wear it.",
+    "picks": "Your picks",
+    "draw": "Draw the look",
+    "start_over": "Start over",
+    "add_to_cart": "Add to basket"
+  }
+}
