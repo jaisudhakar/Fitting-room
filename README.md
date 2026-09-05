@@ -183,10 +183,62 @@ Scopes: `read_products`, `write_products`, `write_cart_transforms`, `read_orders
 ## Getting started
 
 ```bash
-npm start                          # http://localhost:3000
-npm test                           # 121 tests, node:test
+npm start                          # the module set:  http://localhost:3000
+npm run start:single-file          # the one-file build: http://localhost:3000
+npm test                           # 140 tests, node:test
 node examples/fitting-room-flow.js # the whole flow, no server needed
 ```
+
+## The single-file build
+
+`standalone/fitting-room.js` is the entire concept in one Node.js file — catalogue,
+manufacturing rules, size recommendation, pricing, validation, draft sessions, the JSON
+API **and** the storefront page. No dependencies, no build step, no database:
+
+```bash
+node standalone/fitting-room.js   # → http://localhost:3000, open it in a browser
+```
+
+It is the same domain as `src/`, written to be read top to bottom or dropped into another
+project whole. The fourteen sections are numbered in the file:
+
+| § | What |
+| --- | --- |
+| 1 | Configuration — every value overridable from the environment |
+| 2 | The catalogue — option groups, prices, lead times, tailoring rules, monogram, measurements |
+| 3 | Size charts and products |
+| 4 | Typed errors that carry an HTTP status |
+| 5 | Repository — the catalogue as *this* product offers it |
+| 6 | Validation — what the atelier will and will not cut |
+| 7 | Pricing — integer minor units, VAT, lead time, ship date |
+| 8 | Size recommendation — a size, a confidence, and why |
+| 9 | Draft sessions, behind a store interface you can swap for Redis |
+| 10 | The service — the domain, usable with or without HTTP |
+| 11 | A very small router |
+| 12 | Routes |
+| 13 | The storefront page |
+| 14 | The app: routes + page + a sweeper for expired drafts |
+
+Importing it is side-effect free, so it doubles as a library:
+
+```js
+import { previewSelection, recommendSize, getProductBySlug } from './standalone/fitting-room.js';
+
+const { price, validation } = previewSelection('beige-linen-shirt', {
+  options: { size: 'l', fit: 'tailored', fabric: 'belgian-linen-180', collar: 'cutaway',
+             sleeve: 'long', cuff: 'french', placket: 'standard', pocket: 'none',
+             buttons: 'mother-of-pearl', hem: 'curved' },
+  monogram: { enabled: true, text: 'JS', position: 'cuff-left', font: 'script', thread: 'navy' },
+});
+
+price.formatted.total;   // '€200.40'
+price.leadTimeDays;      // 11
+validation.valid;        // true
+```
+
+The browser never computes a price: the page PATCHes the draft session and renders whatever
+the server says the garment now costs, so a shopper cannot talk the checkout into a number
+the atelier did not quote.
 
 ## Layout
 
@@ -213,6 +265,7 @@ shopify/
   shopify.app.toml             scopes, app proxy, webhooks
   extensions/fitting-room-ui/  theme app extension: the product-page block
   extensions/fitting-room-pricing/  cart transform function
+standalone/fitting-room.js     the whole concept in one dependency-free file
 demo/template.html             demo storefront markup, with a data placeholder
 demo/index.html                the built demo page (generated — do not edit by hand)
 scripts/build-demo.mjs         bakes the live catalogue into the demo page
@@ -377,5 +430,6 @@ VAT, lead time), `test/sizing.test.js` (estimation and recommendation),
 `test/service.test.js` (sessions, merging, cart lines), `test/try-on.test.js` (the rail, the
 prompt, and every Google failure mapped through an injected `fetch`), `test/shopify.test.js`
 (proxy signatures, webhook HMAC, product mapping, the cached source, the Admin client, cart
-line tampering and the cart transform function) and `test/api.test.js` (the HTTP surface,
-against a real server). No test touches the network.
+line tampering and the cart transform function), `test/api.test.js` (the HTTP surface,
+against a real server) and `test/standalone.test.js` (the single-file build, domain and
+HTTP, against a real server). No test touches the network.
