@@ -6,13 +6,15 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
-    "./server": "./src/server.js"
+    "./server": "./src/server.js",
+    "./standalone": "./standalone/fitting-room.js"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
     "start": "node src/server.js",
+    "start:single-file": "node standalone/fitting-room.js",
     "dev": "node --watch src/server.js",
     "test": "node --test test/*.test.js",
     "shopify:setup": "node scripts/shopify-setup.mjs",

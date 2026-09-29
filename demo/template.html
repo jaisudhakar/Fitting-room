@@ -606,9 +606,98 @@
   footer.note code { font-family: var(--font-mono); font-size: 0.72rem; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* ── the 3D stage ─────────────────────────────────────────────── */
+
+  .stage3d {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border: 1px solid var(--line);
+    background: var(--surface-sunk);
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .stage3d canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+  }
+  .stage3d canvas:active { cursor: grabbing; }
+
+  .stage3d .hint {
+    position: absolute;
+    left: 0.6rem;
+    bottom: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    border: 1px solid var(--line);
+    padding: 0.2rem 0.45rem;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+  }
+  .stage3d[data-touched="yes"] .hint { opacity: 0; }
+
+  .stage3d .tools {
+    position: absolute;
+    left: 0.6rem;
+    top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .stage3d .tools button {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border: 1px solid var(--line);
+    padding: 0.28rem 0.5rem;
+    cursor: pointer;
+  }
+  .stage3d .tools button:hover { color: var(--ink); border-color: var(--line-strong); }
+  .stage3d .tools button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
+
+  /* The flat sketch stays as the fallback wherever WebGL cannot run. */
+  .sketch[data-mode="3d"] #flat { display: none; }
+  .sketch[data-mode="flat"] .stage3d { display: none; }
+
+  /* The card leans a little towards the pointer, so the panel feels physical. */
+  .sketch {
+    transform: perspective(1200px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  /* Sections rise into place as they are scrolled to. */
+  .sections > section,
+  .rail > .docket {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .sections > section.revealed,
+  .rail > .docket.revealed { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sketch { transform: none !important; }
+    .sections > section,
+    .rail > .docket { opacity: 1 !important; transform: none !important; }
+  }
 </style>
 
 <script id="fr-data" type="application/json">"__FITTING_ROOM_DATA__"</script>
+
+<script>/* __GARMENT3D__ */</script>
 
 <div class="wrap">
   <header class="masthead">
@@ -625,7 +714,15 @@
 
   <div class="layout">
     <aside class="rail">
-      <figure class="sketch">
+      <figure class="sketch" id="sketch" data-mode="flat">
+        <div class="stage3d" id="stage3d">
+          <canvas id="garment" role="img" aria-label="The shirt as customised, drawn in three dimensions"></canvas>
+          <p class="hint">Drag to turn · scroll to zoom</p>
+          <div class="tools">
+            <button type="button" id="view-spin" aria-pressed="true">Auto-turn</button>
+            <button type="button" id="view-reset">Reset</button>
+          </div>
+        </div>
         <svg id="flat" viewBox="0 0 300 372" role="img" aria-label="Flat sketch of the shirt as customised">
           <g class="variant variant--sleeve-long">
             <path class="outline" d="M98 66 L42 104 L64 250 L102 234 Z"></path>
@@ -1106,6 +1203,77 @@
     "collar-inner": { x: 150, y: 48 },
   };
 
+  /* ── the 3D stage ─────────────────────────────────────────────
+   * The flat SVG stays in the page as the fallback: if WebGL is missing or
+   * the context is refused, nothing here runs and the sketch is what shows.
+   */
+  let garment = null;
+
+  const surfaceColour = () => {
+    const value = getComputedStyle(document.documentElement).getPropertyValue('--surface-sunk').trim();
+    return /^#[0-9a-f]{6}$/i.test(value) ? value : '#EDEAE3';
+  };
+
+  const bootGarment = () => {
+    if (typeof window.createGarmentView !== 'function') return;
+    let view = null;
+    try {
+      view = window.createGarmentView($("garment"), { backdrop: surfaceColour() });
+    } catch (error) {
+      return;
+    }
+    if (!view || !view.supported) return;
+
+    garment = view;
+    $("sketch").dataset.mode = "3d";
+
+    const stage = $("stage3d");
+    const markTouched = () => { stage.dataset.touched = "yes"; };
+    stage.addEventListener("pointerdown", markTouched, { once: true });
+    stage.addEventListener("wheel", markTouched, { once: true, passive: true });
+
+    const spin = $("view-spin");
+    spin.addEventListener("click", () => {
+      const on = spin.getAttribute("aria-pressed") !== "true";
+      spin.setAttribute("aria-pressed", String(on));
+      garment.setSpin(on);
+    });
+    $("view-reset").addEventListener("click", () => garment.resetView());
+
+    if (window.matchMedia) {
+      const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+      const onScheme = () => garment.setBackdrop(surfaceColour());
+      if (scheme.addEventListener) scheme.addEventListener("change", onScheme);
+    }
+  };
+
+  const paintGarment = (fabric, button, thread) => {
+    if (!garment) return;
+    garment.update({
+      fit: state.options.fit,
+      size: state.options.size,
+      sleeve: state.options.sleeve,
+      cuff: state.options.cuff,
+      collar: state.options.collar,
+      placket: state.options.placket,
+      pocket: state.options.pocket,
+      hem: state.options.hem,
+      buttons: state.options.buttons,
+      fabricSwatch: (fabric && fabric.swatch) || "#D8CBB4",
+      buttonSwatch: (button && button.swatch) || "#E8E0CF",
+      weightGsm: (fabric && fabric.meta && fabric.meta.weightGsm) || 160,
+      monogram:
+        state.monogram && state.monogram.text
+          ? {
+              text: state.monogram.text,
+              position: state.monogram.position,
+              font: state.monogram.font,
+              threadSwatch: (thread && thread.swatch) || "#1F2A44",
+            }
+          : null,
+    });
+  };
+
   const paintSketch = () => {
     const svg = $("flat");
     const fabric = groupsById.fabric.values.find((value) => value.id === state.options.fabric);
@@ -1134,6 +1302,11 @@
     $("sketch-fabric").textContent = fabric ? fabric.label : "—";
     const size = groupsById.size.values.find((value) => value.id === state.options.size);
     $("sketch-size").textContent = size ? size.label : "—";
+
+    const thread = state.monogram
+      ? DATA.monogram.threads.find((item) => item.id === state.monogram.thread)
+      : null;
+    paintGarment(fabric, button, thread);
   };
 
   /* ── render ──────────────────────────────────────────────────── */
@@ -1628,8 +1801,55 @@
   room.key = readStoredKey();
   if (window.innerWidth < 900) room.open = false;
 
+  /* ── page motion ──────────────────────────────────────────── */
+
+  const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const revealOnScroll = () => {
+    const targets = document.querySelectorAll(".sections > section, .rail > .docket");
+    if (calm || !window.IntersectionObserver) {
+      targets.forEach((node) => node.classList.add("revealed"));
+      return;
+    }
+    const seen = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("revealed");
+          seen.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.06 },
+    );
+    targets.forEach((node) => seen.observe(node));
+  };
+
+  /** The sketch card leans towards the pointer — a couple of degrees, no more. */
+  const tiltCard = () => {
+    const card = $("sketch");
+    if (calm || !card || window.matchMedia("(pointer: coarse)").matches) return;
+    const reset = () => {
+      card.style.setProperty("--tilt-x", "0deg");
+      card.style.setProperty("--tilt-y", "0deg");
+    };
+    card.addEventListener("pointermove", (event) => {
+      // Dragging the garment must not fight the card tilt.
+      if (event.target && event.target.tagName === "CANVAS" && event.buttons) return;
+      const box = card.getBoundingClientRect();
+      const px = (event.clientX - box.left) / box.width - 0.5;
+      const py = (event.clientY - box.top) / box.height - 0.5;
+      card.style.setProperty("--tilt-y", (px * 3.2).toFixed(2) + "deg");
+      card.style.setProperty("--tilt-x", (-py * 2.4).toFixed(2) + "deg");
+    });
+    card.addEventListener("pointerleave", reset);
+    card.addEventListener("pointercancel", reset);
+  };
+
+  bootGarment();
   render();
   showVerdict();
   renderRoom();
+  revealOnScroll();
+  tiltCard();
 })();
 </script>
