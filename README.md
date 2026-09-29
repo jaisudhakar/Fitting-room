@@ -29,6 +29,7 @@ Trousers*) included to prove that the catalogue is per-product configurable.
 | Draft sessions so a shopper can leave and come back | `session.js` |
 | Cart line with a stable `variantKey` for basket de-duplication | `service.js` |
 | Dependency-free JSON HTTP API | `http/router.js`, `routes.js`, `controller.js` |
+| Live 3D garment — every option reshapes it, and the change is morphed | `demo/garment3d.js` |
 | Try-on rail: up to six validated picks per look | `try-on/service.js` |
 | Shopify: metafield-driven catalogue, signed quotes, cart transform pricing | `adapters/shopify/`, `shopify/` |
 | Prompt written from the make-up, not the product name | `try-on/prompt.js` |
@@ -44,13 +45,43 @@ draw it on a mannequin:
 
 **https://claude.ai/code/artifact/777e85ca-a12c-48ea-a087-c4bc616a1d0f**
 
+The shirt in the rail is **real 3D**, not a sprite sheet: pick a cutaway collar and the
+points spread, go oversized and the body fills out and the hem drops straight, choose a
+French cuff and it turns back on itself, add a monogram and it is embroidered where you
+asked for it — in satin stitch that catches the light. Drag to turn the garment, scroll to
+zoom.
+
 The page is static and ships in `demo/index.html`; open it straight from disk if you prefer.
 The fitting room panel calls Google directly with the key you paste into it — which the
 published artifact's sandbox blocks, so there it falls back to a preview this page draws
 itself. Open the file locally, or run the service, to draw for real.
 Its catalogue, rules, size chart and sizing coefficients are generated from the module's own
 source by `node scripts/build-demo.mjs`, so it cannot drift from the API — re-run that after
-changing `catalog.js` or `data/products.json`.
+changing `catalog.js` or `data/products.json`. The same script inlines `demo/garment3d.js`,
+so the demo stays one file that runs offline.
+
+### The 3D garment
+
+`demo/garment3d.js` is a renderer written straight against WebGL2 — no three.js, no import
+map, no build step, because the demo has to open from `file://` with no network.
+
+- **One topology, many shapes.** The shirt is a single fixed mesh that every option
+  *reshapes* rather than rebuilds: the block, the size, the sleeve length, the collar, the
+  cuff, the placket, the pockets and the hem all move the same vertices. That is what lets a
+  change be **morphed** — two position sets and a lerp in the vertex shader — instead of
+  popping.
+- **Cloth, not plastic.** A three-point studio rig with a sheen lobe, wrapped diffuse so
+  linen has no hard terminator, light coming *through* the cloth from behind, hemispheric
+  ambient and baked per-vertex occlusion. The weave is procedural — warp and weft evaluated
+  per pixel, with slubs — so it holds up when you zoom in, and it coarsens with the fabric's
+  real `weightGsm`.
+- **A photograph, not a render.** The scene is drawn to a supersampled target; one post pass
+  resolves it, tone-maps with an ACES fit, blooms the highlights and adds a vignette and a
+  little grain. The shadow is cast onto the backdrop and blurred, the way a ghost-mannequin
+  product shot looks.
+- **It gives way politely.** No WebGL2, a refused context, or `prefers-reduced-motion` and
+  the page falls back to the flat SVG sketch or simply stops moving. Nothing else on the
+  page depends on it.
 
 ## Try-on: wearing the make-up
 
@@ -185,7 +216,7 @@ Scopes: `read_products`, `write_products`, `write_cart_transforms`, `read_orders
 ```bash
 npm start                          # the module set:  http://localhost:3000
 npm run start:single-file          # the one-file build: http://localhost:3000
-npm test                           # 140 tests, node:test
+npm test                           # 145 tests, node:test
 node examples/fitting-room-flow.js # the whole flow, no server needed
 ```
 
@@ -266,6 +297,7 @@ shopify/
   extensions/fitting-room-ui/  theme app extension: the product-page block
   extensions/fitting-room-pricing/  cart transform function
 standalone/fitting-room.js     the whole concept in one dependency-free file
+demo/garment3d.js              the 3D garment: WebGL2, no libraries
 demo/template.html             demo storefront markup, with a data placeholder
 demo/index.html                the built demo page (generated — do not edit by hand)
 scripts/build-demo.mjs         bakes the live catalogue into the demo page
@@ -431,5 +463,7 @@ VAT, lead time), `test/sizing.test.js` (estimation and recommendation),
 prompt, and every Google failure mapped through an injected `fetch`), `test/shopify.test.js`
 (proxy signatures, webhook HMAC, product mapping, the cached source, the Admin client, cart
 line tampering and the cart transform function), `test/api.test.js` (the HTTP surface,
-against a real server) and `test/standalone.test.js` (the single-file build, domain and
-HTTP, against a real server). No test touches the network.
+against a real server), `test/standalone.test.js` (the single-file build, domain and
+HTTP, against a real server) and `test/demo-build.test.js` (the demo is rebuilt and
+compared, and every collar, size and monogram position in the catalogue is checked to have
+a shape in the renderer). No test touches the network.

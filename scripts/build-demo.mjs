@@ -61,11 +61,20 @@ const data = {
 };
 
 const template = readFileSync(path('../demo/template.html'), 'utf8');
-const html = template.replace('"__FITTING_ROOM_DATA__"', JSON.stringify(data, null, 2));
+const renderer = readFileSync(path('../demo/garment3d.js'), 'utf8');
 
+let html = template.replace('"__FITTING_ROOM_DATA__"', JSON.stringify(data, null, 2));
 if (html === template) throw new Error('The data placeholder is missing from demo/template.html.');
+
+// The demo has to run from file:// with no network, so the 3D renderer is
+// inlined rather than linked. `$&` in a replacement string is a back-reference,
+// so the source is passed as a function to keep it verbatim.
+const withRenderer = html.replace('/* __GARMENT3D__ */', () => renderer);
+if (withRenderer === html) throw new Error('The renderer placeholder is missing from demo/template.html.');
+html = withRenderer;
 
 writeFileSync(path('../demo/index.html'), html);
 console.log(
-  `demo/index.html written — ${data.groups.length} option groups, ${data.rules.length} rules, ${data.tryOn.mannequins.length} mannequins.`,
+  `demo/index.html written — ${data.groups.length} option groups, ${data.rules.length} rules, ` +
+    `${data.tryOn.mannequins.length} mannequins, ${Math.round(renderer.length / 1024)} kB of renderer.`,
 );
